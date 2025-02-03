@@ -19,7 +19,7 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false
     },
     name: {
-      type: DataTypes.ENUM,
+      type: DataTypes.ENUM('Coordenador', 'Diretor de Ensino', 'Diretor Geral', 'Funcionário da CTP', 'Professor'),
       allowNull: false
     }
   }, 
