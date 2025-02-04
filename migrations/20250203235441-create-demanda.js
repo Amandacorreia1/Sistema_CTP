@@ -18,7 +18,7 @@ module.exports = {
         allowNull: false,
         defaultValue: true
       },
-      usuarioId: {
+      usuario_id: {
         type: Sequelize.INTEGER,
         allowNull: false, 
         references: {
