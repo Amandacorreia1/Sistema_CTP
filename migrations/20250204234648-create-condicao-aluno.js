@@ -2,27 +2,28 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable('AmparoDemandas', {
-      demanda_id: {
+    await queryInterface.createTable('CondicaoAlunos', {
+      condicao_id: {
         type: Sequelize.INTEGER,
         allowNull: false,
         references: {
-          model: 'Demandas', 
+          model: 'Condicao', 
           key: 'id' 
         },
         onDelete: 'CASCADE',
         onUpdate: 'CASCADE'
       },
-      amparoLegal_id: {
+      matricula: {
         type: Sequelize.INTEGER,
         allowNull: false,
         references: {
-          model: 'AmparoLegal', 
+          model: 'Aluno', 
           key: 'id' 
         },
         onDelete: 'CASCADE', 
         onUpdate: 'CASCADE'
       },
+      
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE
@@ -32,14 +33,12 @@ module.exports = {
         type: Sequelize.DATE
       }
     });
-
-    await queryInterface.addConstraint('AmparoDemandas', {
-      fields: ['demanda_id', 'amparoLegal_id'],
-      type: 'unique', 
+    await queryInterface.addConstraint('CondicaoAluno', {
+      type: 'primary key',
+      fields: ['condicao_id', 'matricula']
     });
   },
-
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('AmparoDemandas');
+    await queryInterface.dropTable('CondicaoAlunos');
   }
 };
