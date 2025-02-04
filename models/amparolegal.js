@@ -15,7 +15,14 @@ module.exports = (sequelize, DataTypes) => {
       autoIncrement: true,
     },
     nome: {
-      type: DataTypes.ENUM, //saber quais tipos serao determinados
+      type: DataTypes.ENUM, 
+      values: [
+        'Receber educação de qualidade, que promova o seu desenvolvimento profissional e humano.',
+        'Solicitar à coordenadoria de seu curso orientação para solução de eventuais dificuldades na vida acadêmica.',
+        'Denunciar, tendo assegurado o anonimato, o mau uso do patrimônio público, depredações e atos de vandalismo, condutas ilícitas, por parte dos pares e servidores.',
+        'Outros'
+      ],
+
       allowNull: false
     },    
   }, {
