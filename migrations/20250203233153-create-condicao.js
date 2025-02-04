@@ -10,10 +10,9 @@ module.exports = {
         type: Sequelize.INTEGER
       },
       nome: {
-        type: Sequelize.ENUM('Transtorno do Espectro Autista', 'TDAH(Transtorno do Déficit de Atenção com Hiperatividade)',
-        'Deficiência Auditiva', 'Deficiência Motora/Física', 'Deficiência Visual(cegueira ou baixa visão)',
-        'Transtornos do Desenvolvimento Global',
-        'Deficiência Intelectual', 'Deficiência Múltipla', 'Portador de Altas Habilidades', 'Outra')
+        type: Sequelize.STRING,
+        allowNull: false,
+        unique: true
       },
       createdAt: {
         allowNull: false,
