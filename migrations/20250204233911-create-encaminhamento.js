@@ -2,11 +2,11 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable('IntervencaoDemanda', {
-      intervencao_id: {
+    await queryInterface.createTable('Encaminhamentos', {
+      usuario_id: {
         type: Sequelize.INTEGER,
         allowNull: false,
-        references: { model: 'Intervencaos', key: 'id' },
+        references: { model: 'Usuarios', key: 'id' },
         onUpdate: 'CASCADE',
         onDelete: 'CASCADE'
       },
@@ -17,18 +17,14 @@ module.exports = {
         onUpdate: 'CASCADE',
         onDelete: 'CASCADE'
       },
-      usuario_id: {
-        type: Sequelize.INTEGER,
-        allowNull: false,
-        references: { model: 'Usuarios', key: 'id' },
-        onUpdate: 'CASCADE',
-        onDelete: 'CASCADE'
-      },
-      data: {
-        type: Sequelize.DATE
+      destinatarios: {
+        type: Sequelize.INTEGER
       },
       descricao: {
         type: Sequelize.STRING
+      },
+      data: {
+        type: Sequelize.DATE
       },
       createdAt: {
         allowNull: false,
@@ -37,16 +33,15 @@ module.exports = {
       updatedAt: {
         allowNull: false,
         type: Sequelize.DATE
-      }
+      }     
     });
 
-    await queryInterface.addConstraint('IntervencaoDemanda', {
+    await queryInterface.addConstraint('Encaminhamentos', {
       type: 'primary key',
-      fields: ['intervencao_id', 'demanda_id', 'usuario_id']
+      fields: ['usuario_id', 'demanda_id', ]
     });
-
   },
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('IntervencaoDemanda');
+    await queryInterface.dropTable('Encaminhamentos');
   }
 };
