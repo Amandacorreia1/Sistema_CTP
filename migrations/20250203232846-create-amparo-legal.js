@@ -10,11 +10,10 @@ module.exports = {
         type: Sequelize.INTEGER
       },
       nome: {
-        type: Sequelize.ENUM('Receber educação de qualidade, que promova o seu desenvolvimento profissional e humano.',
-        'Solicitar à coordenadoria de seu curso orientação para solução de eventuais dificuldades na vida acadêmica.',
-        'Denunciar, tendo assegurado o anonimato, o mau uso do patrimônio público, depredações e atos de vandalismo, condutas ilícitas, por parte dos pares e servidores.',
-        'Outros'
-      )},
+        type: Sequelize.STRING,        
+        allowNull: false,
+        unique: true
+    },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE
