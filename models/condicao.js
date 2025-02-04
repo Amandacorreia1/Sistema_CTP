@@ -17,7 +17,12 @@ module.exports = (sequelize, DataTypes) => {
       autoIncrement: true,
     },
     nome: {
-      type: DataTypes.STRING, // COLOCAR O ENUM
+      type: DataTypes.ENUM, 
+      values: ['Transtorno do Espectro Autista', 'TDAH(Transtorno do Déficit de Atenção com Hiperatividade)',
+        'Deficiência Auditiva', 'Deficiência Motora/Física', 'Deficiência Visual(cegueira ou baixa visão)',
+        'Transtornos do Desenvolvimento Global',
+        'Deficiência Intelectual', 'Deficiência Múltipla', 'Portador de Altas Habilidades', 'Outra'
+      ],
       allowNull: false
     }
   }, {
