@@ -17,20 +17,12 @@ module.exports = (sequelize, DataTypes) => {
     },
     nome: {
       type: DataTypes.ENUM,
-      values: ['Diretor Geral', 'Coodernador', 'CTP',"Diretor Ensino","Professor","Aluno"],
+      values: ['Diretor Geral', 'Coodernador', 'Funcionario CTP',"Diretor Ensino","Professor","Aluno"],
       allowNull: false
-    },
-    updatedAt:{
-      type: DataTypes.DATE,
-      defaultValue: DataTypes.NOW,
-    },
-    createdAt:{
-      type: DataTypes.DATE,
-      defaultValue: DataTypes.NOW,
     }
   }, {
     sequelize,
-    modelName: 'Cargo',
+    modelName: 'Cargos',
   });
   return Cargo;
 };

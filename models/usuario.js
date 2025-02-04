@@ -54,17 +54,8 @@ module.exports = (sequelize, DataTypes) => {
         key: 'id'
       },
       allowNull: false,
-      onDelete: 'CASCADE'
-    },
-    createdAt:{
-      type: DataTypes.DATE,
-      defaultValue: DataTypes.NOW,
-      allowNull: false
-    },
-    updatedAt:{
-      type: DataTypes.DATE,
-      defaultValue: DataTypes.NOW,
-      allowNull: false
+      onDelete: 'CASCADE',
+      onUpdate: 'CASCADE'
     }
   }, {
     sequelize,

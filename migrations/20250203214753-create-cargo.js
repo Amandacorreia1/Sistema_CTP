@@ -11,7 +11,7 @@ module.exports = {
       },
       nome: {
         type: Sequelize.ENUM,
-        values: ['Diretor Geral', 'Coodernador', 'CTP',"Diretor Ensino","Professor","Aluno"],
+        values: ['Diretor Geral', 'Coodernador', 'Funcionario CTP',"Diretor Ensino","Professor","Aluno"],
         allowNull: false
       },
       createdAt: {
