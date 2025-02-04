@@ -10,10 +10,21 @@ module.exports = {
         type: Sequelize.INTEGER
       },
       descricao: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
+        allowNull: false,
       },
       status: {
-        type: Sequelize.BOOLEAN
+        type: Sequelize.BOOLEAN,
+        allowNull: false,
+        defaultValue: true
+      },
+      usuarioId: {
+        type: Sequelize.INTEGER,
+        allowNull: false, 
+        references: {
+          model: 'Usuarios', 
+          key: 'id'
+        },
       },
       createdAt: {
         allowNull: false,
