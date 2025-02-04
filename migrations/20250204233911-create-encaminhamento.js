@@ -38,7 +38,7 @@ module.exports = {
 
     await queryInterface.addConstraint('Encaminhamentos', {
       type: 'primary key',
-      fields: ['usuario_id', 'demanda_id', ]
+      fields: ['usuario_id', 'demanda_id']
     });
   },
   async down(queryInterface, Sequelize) {
