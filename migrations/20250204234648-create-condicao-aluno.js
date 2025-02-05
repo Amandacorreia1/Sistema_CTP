@@ -33,7 +33,7 @@ module.exports = {
         type: Sequelize.DATE
       }
     });
-    await queryInterface.addConstraint('CondicaoAluno', {
+    await queryInterface.addConstraint('CondicaoAlunos', {
       type: 'primary key',
       fields: ['condicao_id', 'matricula']
     });
