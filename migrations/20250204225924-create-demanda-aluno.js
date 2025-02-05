@@ -5,21 +5,21 @@ module.exports = {
     await queryInterface.createTable('DemandaAlunos', {
       demanda_id: {
         type: Sequelize.INTEGER,
-        allowNull: false, 
+        allowNull: false,
         references: {
-          model: 'Demanda', 
+          model: 'Demandas',
           key: 'id',
         },
         onDelete: 'CASCADE',
         onUpdate: 'CASCADE'
       },
-        aluno_id: {
-          type: Sequelize.INTEGER,
-          allowNull: false, 
-          references: {
-            model: 'Aluno', 
-            key: 'id',
-          }, 
+      aluno_id: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        references: {
+          model: 'Alunos',
+          key: 'matricula',
+        },
         onDelete: 'CASCADE',
         onUpdate: 'CASCADE'
       },
@@ -37,7 +37,7 @@ module.exports = {
     });
     await queryInterface.addConstraint('DemandaAlunos', {
       type: 'primary key',
-      fields: ['demanda_id', 'matricula']
+      fields: ['demanda_id', 'aluno_id']
     });
   },
   async down(queryInterface, Sequelize) {
