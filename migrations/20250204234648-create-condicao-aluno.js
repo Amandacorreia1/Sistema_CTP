@@ -8,17 +8,17 @@ module.exports = {
         allowNull: false,
         references: {
           model: 'Condicoes', 
-          key: 'id' 
+          key: 'id',
         },
         onDelete: 'CASCADE',
         onUpdate: 'CASCADE'
       },
-      matricula: {
+      aluno_id: {
         type: Sequelize.INTEGER,
         allowNull: false,
         references: {
-          model: 'Alunos', 
-          key: 'matricula' 
+          model: 'Alunos',  
+          key: 'matricula'  
         },
         onDelete: 'CASCADE', 
         onUpdate: 'CASCADE'
@@ -33,11 +33,13 @@ module.exports = {
         type: Sequelize.DATE
       }
     });
+
     await queryInterface.addConstraint('CondicaoAlunos', {
       type: 'primary key',
-      fields: ['condicao_id', 'matricula']
+      fields: ['condicao_id', 'aluno_id'] 
     });
   },
+
   async down(queryInterface, Sequelize) {
     await queryInterface.dropTable('CondicaoAlunos');
   }
