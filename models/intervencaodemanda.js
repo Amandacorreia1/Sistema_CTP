@@ -1,27 +1,34 @@
 'use strict';
-const {
-  Model
-} = require('sequelize');
+const { Model } = require('sequelize');
+
 module.exports = (sequelize, DataTypes) => {
   class IntervencaoDemanda extends Model {
     static associate(models) {
-      IntervencaoDemanda.hasOne(models.Demanda, { through: 'Demanda', foreignKey: 'demanda_id'});
-      IntervencaoDemanda.hasOne(models.Intervencao, { through: 'Intervencao', foreignKey: 'demanda_id'});
-      IntervencaoDemanda.hasOne(models.Usuario, { through: 'Usuario'})
+      IntervencaoDemanda.belongsTo(models.Demanda, { foreignKey: 'demanda_id' });
+      IntervencaoDemanda.belongsTo(models.Intervencao, { foreignKey: 'intervencao_id' });
+      IntervencaoDemanda.belongsTo(models.Usuario, { foreignKey: 'usuario_id' });
     }
   }
+
   IntervencaoDemanda.init({
     intervencao_id: {
       type: DataTypes.INTEGER,
+      allowNull: false,
+      references: { model: 'Intervencoes', key: 'id' }
     },
     demanda_id: {
       type: DataTypes.INTEGER,
+      allowNull: false,
+      references: { model: 'Demandas', key: 'id' }
     },
-    usuario_id: {
+    usuario_id: {  
       type: DataTypes.INTEGER,
+      allowNull: false,
+      references: { model: 'Usuarios', key: 'id' }
     },
     data: {
       type: DataTypes.DATE,
+      allowNull: false
     },
     descricao: {
       type: DataTypes.STRING,
@@ -31,5 +38,6 @@ module.exports = (sequelize, DataTypes) => {
     sequelize,
     modelName: 'IntervencaoDemanda',
   });
+
   return IntervencaoDemanda;
 };

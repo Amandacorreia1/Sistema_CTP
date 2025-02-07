@@ -4,20 +4,29 @@ const {
 } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
   class Encaminhamento extends Model {
-    /**
-     * Helper method for defining associations.
-     * This method is not a part of Sequelize lifecycle.
-     * The `models/index` file will call this method automatically.
-     */
     static associate(models) {
-      // define association here
+      Encaminhamento.belongsToMany(models.Demanda, { foreignKey: 'demanda_id' });
+      Encaminhamento.belongsToMany(models.Usuario, { foreignKey: 'usuario_id' });
+      Encaminhamento.belongsTo(models.IntervencaoDemanda, { foreignKey: 'intervencao_id'});
     }
   }
   Encaminhamento.init({
-    usuario_id: DataTypes.INTEGER,
-    demanda_id: DataTypes.INTEGER,
-    destinatario: DataTypes.INTEGER,
-    descricao: DataTypes.STRING
+    usuario_id: {
+      type: DataTypes.INTEGER,
+      allowNull: false
+    },
+    demanda_id: {
+      type: DataTypes.INTEGER,
+      allowNull: false
+    },
+    destinatario: {
+      type: DataTypes.INTEGER,
+      allowNull: false
+    },
+    descricao: {
+      type: DataTypes.STRING,
+      allowNull: false
+    },
   }, {
     sequelize,
     modelName: 'Encaminhamento',
