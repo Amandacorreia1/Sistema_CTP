@@ -1,11 +1,11 @@
 'use strict';
-const {
+const { 
   Model
 } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
   class Demanda extends Model {
     static associate(models) {
-      Demanda.hasOne(models.Usuario, { foreignKey: 'usuario_id'});
+      Demanda.belongsTo(models.Usuario, { foreignKey: 'usuario_id'});
       Demanda.belongsToMany(models.AmparoLegal, {through: 'AmparoDemanda', foreignKey: 'demanda_id', otherKey: 'amparolegal_id'});
       Demanda.belongsToMany(models.Usuario, {through: 'Encaminhamento', foreignKey: 'demanda_id', otherKey: 'usuario_id'});
       Demanda.belongsToMany(models.Aluno, {through: 'DemandaAluno', foreignKey: 'demanda_id', otherKey: 'matricula'});
@@ -36,7 +36,7 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
-        model: 'Usuario', key: 'id'
+        model: 'Usuarios', key: 'id'
       }
     }
   },

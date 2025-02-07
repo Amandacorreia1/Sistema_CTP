@@ -23,8 +23,6 @@ module.exports = (sequelize, DataTypes) => {
   }, {
     sequelize,
     modelName: 'AmparoLegal',
-    tableName: 'AmparoLegal',
-    timestamps: true,
-  });
+    });
   return AmparoLegal;
 };
