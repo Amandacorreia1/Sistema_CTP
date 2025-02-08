@@ -5,7 +5,8 @@ const {
 module.exports = (sequelize, DataTypes) => {
   class Usuario extends Model {
     static associate(models) {
-      Usuario.belongsTo(models.cargo, { foreignKey: 'cargo_id' });
+      Usuario.belongsTo(models.Cargo, { foreignKey: 'cargo_id' });
+      Usuario.hasOne(models.Demanda, { foreignKey: 'usuario_id'});
     }
   }
   Usuario.init({
@@ -50,7 +51,7 @@ module.exports = (sequelize, DataTypes) => {
     cargo_id: {
       type: DataTypes.INTEGER,
       references: {
-        model: 'cargos',
+        model: 'Cargos',
         key: 'id'
       },
       allowNull: false,
