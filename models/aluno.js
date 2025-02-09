@@ -9,7 +9,7 @@ module.exports = (sequelize, DataTypes) => {
       Aluno.belongsToMany(models.Demanda, {through: 'DemandaAluno', foreignKey: 'matricula', otherKey: 'demanda_id'});
     }
   }
-  Condicao.init({
+  Aluno.init({
     matricula: {
       type: DataTypes.INTEGER,
       primaryKey: true,
