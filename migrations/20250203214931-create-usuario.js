@@ -29,20 +29,19 @@ module.exports = {
       },
       cargo_id: {
         type: Sequelize.INTEGER,
+        allowNull: false,
         references: {
           model: 'Cargos',
-          key: 'id',
-          onDelete: 'CASCADE',
-          onUpdate: 'CASCADE'
+          key: 'id'
         },
-        allowNull: false
+        onDelete: 'CASCADE',
+        onUpdate: 'CASCADE'      
       },
       createdAt: {
         type: Sequelize.DATE,
         defaultValue: Sequelize.NOW
       },
       updatedAt: {
-
         type: Sequelize.DATE,
         defaultValue: Sequelize.NOW
       }

@@ -3,6 +3,12 @@
 module.exports = {
   async up(queryInterface, Sequelize) {
     await queryInterface.createTable('AmparoDemandas', {
+      id: {
+        allowNull: false,
+        autoIncrement: true,
+        primaryKey: true,
+        type: Sequelize.INTEGER
+      },
       demanda_id: {
         type: Sequelize.INTEGER,
         allowNull: false,
@@ -31,11 +37,6 @@ module.exports = {
         allowNull: false,
         type: Sequelize.DATE
       }
-    });
-
-    await queryInterface.addConstraint('AmparoDemandas', {
-      fields: ['demanda_id', 'amparoLegal_id'],
-      type: 'unique', 
     });
   },
 

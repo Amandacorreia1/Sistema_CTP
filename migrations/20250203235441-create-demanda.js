@@ -19,16 +19,18 @@ module.exports = {
         defaultValue: true
       },
       nivel: {
-        type: Sequelize.ENUM('Privado','Publico'),
+        type: Sequelize.ENUM('Privado', 'Publico'),
         allowNull: false,
       },
       usuario_id: {
         type: Sequelize.INTEGER,
-        allowNull: false, 
+        allowNull: false,
         references: {
-          model: 'Usuarios', 
+          model: 'Usuarios',
           key: 'id'
         },
+        onDelete: 'CASCADE',
+        onUpdate: 'CASCADE'
       },
       createdAt: {
         allowNull: false,

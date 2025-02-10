@@ -3,22 +3,41 @@
 module.exports = {
   async up(queryInterface, Sequelize) {
     await queryInterface.createTable('Encaminhamentos', {
+      id: {
+        allowNull: false,
+        autoIncrement: true,
+        primaryKey: true,
+        type: Sequelize.INTEGER
+      },
       usuario_id: {
         type: Sequelize.INTEGER,
         allowNull: false,
-        references: { model: 'Usuarios', key: 'id' },
+        references: {
+          model: 'Usuarios',
+          key: 'id'
+        },
         onUpdate: 'CASCADE',
         onDelete: 'CASCADE'
       },
       demanda_id: {
         type: Sequelize.INTEGER,
         allowNull: false,
-        references: { model: 'Demandas', key: 'id' },
+        references: {
+          model: 'Demandas',
+          key: 'id'
+        },
         onUpdate: 'CASCADE',
         onDelete: 'CASCADE'
       },
-      destinatarios: {
-        type: Sequelize.INTEGER
+      destinatario_id: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        references: {
+          model: 'Usuarios',
+          key: 'id'
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE'
       },
       descricao: {
         type: Sequelize.STRING
@@ -33,12 +52,7 @@ module.exports = {
       updatedAt: {
         allowNull: false,
         type: Sequelize.DATE
-      }     
-    });
-
-    await queryInterface.addConstraint('Encaminhamentos', {
-      type: 'primary key',
-      fields: ['usuario_id', 'demanda_id']
+      }
     });
   },
   async down(queryInterface, Sequelize) {

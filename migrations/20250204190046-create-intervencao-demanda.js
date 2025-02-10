@@ -3,24 +3,39 @@
 module.exports = {
   async up(queryInterface, Sequelize) {
     await queryInterface.createTable('IntervencaoDemanda', {
+      id: {
+        allowNull: false,
+        autoIncrement: true,
+        primaryKey: true,
+        type: Sequelize.INTEGER
+      },
       intervencao_id: {
         type: Sequelize.INTEGER,
         allowNull: false,
-        references: { model: 'Intervencaos', key: 'id' },
+        references: {
+          model: 'Intervencoes',
+          key: 'id'
+        },
         onUpdate: 'CASCADE',
         onDelete: 'CASCADE'
       },
       demanda_id: {
         type: Sequelize.INTEGER,
         allowNull: false,
-        references: { model: 'Demandas', key: 'id' },
+        references: {
+          model: 'Demandas',
+          key: 'id'
+        },
         onUpdate: 'CASCADE',
         onDelete: 'CASCADE'
       },
-      usuario_id: {
+      encaminhamento_id: {
         type: Sequelize.INTEGER,
         allowNull: false,
-        references: { model: 'Usuarios', key: 'id' },
+        references: {
+          model: 'Encaminhamentos',
+          key: 'id'
+        },
         onUpdate: 'CASCADE',
         onDelete: 'CASCADE'
       },
@@ -39,12 +54,6 @@ module.exports = {
         type: Sequelize.DATE
       }
     });
-
-    await queryInterface.addConstraint('IntervencaoDemanda', {
-      type: 'primary key',
-      fields: ['intervencao_id', 'demanda_id', 'usuario_id']
-    });
-
   },
   async down(queryInterface, Sequelize) {
     await queryInterface.dropTable('IntervencaoDemanda');
