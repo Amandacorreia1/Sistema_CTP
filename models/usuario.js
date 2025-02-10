@@ -6,7 +6,7 @@ module.exports = (sequelize, DataTypes) => {
   class Usuario extends Model {
     static associate(models) {
       Usuario.belongsTo(models.Cargo, { foreignKey: 'cargo_id' });
-      Usuario.hasOne(models.Demanda, { foreignKey: 'usuario_id'});
+      Usuario.hasMany(models.Demanda, { foreignKey: 'usuario_id'});
     }
   }
   Usuario.init({
@@ -51,7 +51,7 @@ module.exports = (sequelize, DataTypes) => {
     cargo_id: {
       type: DataTypes.INTEGER,
       references: {
-        model: 'Cargos',
+        model: 'Cargo',
         key: 'id'
       },
       allowNull: false,
@@ -61,6 +61,7 @@ module.exports = (sequelize, DataTypes) => {
   }, {
     sequelize,
     modelName: 'Usuario',
+    tableName: 'Usuarios'
   });
   return Usuario;
 };
