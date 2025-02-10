@@ -1,38 +1,38 @@
 'use strict';
-const { 
+const {
   Model
 } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
   class Demanda extends Model {
     static associate(models) {
-      Demanda.belongsTo(models.Usuario, { foreignKey: 'usuario_id'});
-      Demanda.belongsToMany(models.AmparoLegal, {through: 'AmparoDemanda', foreignKey: 'demanda_id', otherKey: 'amparolegal_id'});
-      Demanda.belongsToMany(models.Usuario, {through: 'Encaminhamento', foreignKey: 'demanda_id', otherKey: 'usuario_id'});
-      Demanda.belongsToMany(models.Aluno, {through: 'DemandaAluno', foreignKey: 'demanda_id', otherKey: 'matricula'});
-      Demanda.belongsToMany(models.Intervencao, {through: 'IntervencaoDemanda', foreignKey: 'demanda_id', otherKey: 'intervencao_id'})
+      Demanda.belongsTo(models.Usuario, { foreignKey: 'usuario_id' });
+      Demanda.belongsToMany(models.AmparoLegal, { through: 'AmparoDemanda', foreignKey: 'demanda_id', otherKey: 'amparolegal_id' });
+      Demanda.belongsToMany(models.Aluno, { through: 'DemandaAluno', foreignKey: 'demanda_id', otherKey: 'matricula' });
+      Demanda.hasMany(models.Encaminhamento, { foreignKey: 'encaminhamento_id' });
+      Demanda.hasMany(models.IntervencaoDemanda, { foreignKey: 'intervencaodemanda_id' });
     }
   }
   Demanda.init({
-    id:{
+    id: {
       type: DataTypes.INTEGER,
       primaryKey: true,
       autoIncrement: true,
     },
-    descricao:{
+    descricao: {
       type: DataTypes.STRING,
       allowNull: false
     },
-    status:{
+    status: {
       type: DataTypes.BOOLEAN,
       allowNull: false,
       defaultValue: true
     },
-    nivel:{
+    nivel: {
       type: DataTypes.ENUM,
-      values: ['Privado','Público'],
+      values: ['Privado', 'Público'],
       allowNull: false
     },
-    usuario_id: { 
+    usuario_id: {
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
@@ -40,9 +40,9 @@ module.exports = (sequelize, DataTypes) => {
       }
     }
   },
-  {
-    sequelize,
-    modelName: 'Demanda',
-  });
+    {
+      sequelize,
+      modelName: 'Demanda',
+    });
   return Demanda;
 };

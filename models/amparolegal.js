@@ -9,7 +9,7 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
   AmparoLegal.init({
-    id:{
+    id: {
       type: DataTypes.INTEGER,
       allowNull: false,
       primaryKey: true,
@@ -19,10 +19,10 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: false,
       unique: true,
-    },    
+    },
   }, {
     sequelize,
     modelName: 'AmparoLegal',
-    });
+  });
   return AmparoLegal;
 };

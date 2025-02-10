@@ -6,7 +6,6 @@ module.exports = (sequelize, DataTypes) => {
   class Intervencao extends Model {
     static associate(models) {
       Intervencao.belongsToMany(models.Demanda, { through: 'IntervencaoDemanda', foreignKey: 'intervencao_id' });
-      
     }
   }
   Intervencao.init({

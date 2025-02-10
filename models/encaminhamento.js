@@ -5,12 +5,19 @@ const {
 module.exports = (sequelize, DataTypes) => {
   class Encaminhamento extends Model {
     static associate(models) {
-      Encaminhamento.belongsToMany(models.Demanda, { foreignKey: 'demanda_id' });
-      Encaminhamento.belongsToMany(models.Usuario, { foreignKey: 'usuario_id' });
-      Encaminhamento.belongsTo(models.IntervencaoDemanda, { foreignKey: 'intervencao_id'});
+      Encaminhamento.hasOne(models.Usuario, { foreignKey: 'remetente_id' });
+      Encaminhamento.hasOne(models.Usuario, { foreignKey: 'destinario_id' });
+      Encaminhamento.belongsTo(models.IntervencaoDemanda, { foreignKey: 'intervencaodemanda_id' });
+      Encaminhamento.belongsTo(models.Demanda, { foreignKey: 'demanda_id' });
     }
   }
   Encaminhamento.init({
+    id: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      primaryKey: true,
+      autoIncrement: true,
+    },
     usuario_id: {
       type: DataTypes.INTEGER,
       allowNull: false

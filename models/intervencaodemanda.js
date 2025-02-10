@@ -6,11 +6,16 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
       IntervencaoDemanda.belongsTo(models.Demanda, { foreignKey: 'demanda_id' });
       IntervencaoDemanda.belongsTo(models.Intervencao, { foreignKey: 'intervencao_id' });
-      IntervencaoDemanda.belongsTo(models.Usuario, { foreignKey: 'usuario_id' });
+      IntervencaoDemanda.belongsTo(models.Encaminhamento, { foreignKey: 'encaminhamento_id' });
     }
   }
-
   IntervencaoDemanda.init({
+    id: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      primaryKey: true,
+      autoIncrement: true,
+    },
     intervencao_id: {
       type: DataTypes.INTEGER,
       allowNull: false,
@@ -20,11 +25,6 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.INTEGER,
       allowNull: false,
       references: { model: 'Demandas', key: 'id' }
-    },
-    usuario_id: {  
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      references: { model: 'Usuarios', key: 'id' }
     },
     data: {
       type: DataTypes.DATE,

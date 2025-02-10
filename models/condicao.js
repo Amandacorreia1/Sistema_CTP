@@ -6,8 +6,10 @@ const {
 module.exports = (sequelize, DataTypes) => {
   class Condicao extends Model {
     static associate(models) {
-      Condicao.belongsToMany(models.Aluno, {through: 'CondicaoAluno', foreignKey: 'condicao_id',
-        otherKey: 'matricula'});
+      Condicao.belongsToMany(models.Aluno, {
+        through: 'CondicaoAluno', foreignKey: 'condicao_id',
+        otherKey: 'matricula'
+      });
     }
   }
   Condicao.init({
@@ -17,7 +19,7 @@ module.exports = (sequelize, DataTypes) => {
       autoIncrement: true,
     },
     nome: {
-      type: DataTypes.ENUM, 
+      type: DataTypes.ENUM,
       values: ['Transtorno do Espectro Autista', 'TDAH(Transtorno do Déficit de Atenção com Hiperatividade)',
         'Deficiência Auditiva', 'Deficiência Motora/Física', 'Deficiência Visual(cegueira ou baixa visão)',
         'Transtornos do Desenvolvimento Global',

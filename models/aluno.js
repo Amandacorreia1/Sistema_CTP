@@ -5,8 +5,8 @@ const {
 module.exports = (sequelize, DataTypes) => {
   class Aluno extends Model {
     static associate(models) {
-      Aluno.belongsToMany(models.Condicao, {through: 'CondicaoAluno', foreignKey: 'matricula', otherKey: 'condicao_id'});
-      Aluno.belongsToMany(models.Demanda, {through: 'DemandaAluno', foreignKey: 'matricula', otherKey: 'demanda_id'});
+      Aluno.belongsToMany(models.Condicao, { through: 'CondicaoAluno', foreignKey: 'matricula', otherKey: 'condicao_id' });
+      Aluno.belongsToMany(models.Demanda, { through: 'DemandaAluno', foreignKey: 'matricula', otherKey: 'demanda_id' });
     }
   }
   Aluno.init({
@@ -16,21 +16,21 @@ module.exports = (sequelize, DataTypes) => {
       autoIncrement: true,
     },
     nome: {
-      type: DataTypes.STRING, 
+      type: DataTypes.STRING,
       allowNull: false
     },
     email: {
-      type: DataTypes.STRING, 
+      type: DataTypes.STRING,
       allowNull: false
     },
     curso: {
-      type: DataTypes.STRING, 
+      type: DataTypes.STRING,
       allowNull: false
     }
-  }, 
-  {
-    sequelize,
-    modelName: 'Aluno',
-  });
+  },
+    {
+      sequelize,
+      modelName: 'Aluno',
+    });
   return Aluno;
 };

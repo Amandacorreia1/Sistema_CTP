@@ -6,18 +6,18 @@ const {
 module.exports = (sequelize, DataTypes) => {
   class Cargo extends Model {
     static associate(models) {
-      Cargo.hasMany(models.Usuario, {foreignKey: 'cargo_id'});
+      Cargo.BelongsTo(models.Usuario, { foreignKey: 'cargo_id' });
     }
   }
   Cargo.init({
-    id:{
+    id: {
       type: DataTypes.INTEGER,
       primaryKey: true,
       autoIncrement: true,
     },
     nome: {
       type: DataTypes.ENUM,
-      values: ['Diretor Geral', 'Coodernador', 'Funcionario CTP',"Diretor Ensino","Professor","Aluno"],
+      values: ['Diretor Geral', 'Coodernador', 'Funcionario CTP', "Diretor Ensino", "Professor", "Aluno"],
       allowNull: false
     }
   }, {

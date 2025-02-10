@@ -5,10 +5,9 @@ const {
 module.exports = (sequelize, DataTypes) => {
   class Usuario extends Model {
     static associate(models) {
-      Usuario.belongsTo(models.Cargo, { foreignKey: 'cargo_id' });
-      Usuario.belongsToMany(models.Demanda, { foreignKey: 'usuario_id'});
-      Usuario.hasOne(models.Encaminhamento, { foreignKey: 'chave'});
-      Usuario.hasOne(models.Encaminhamento, { foreignKey: 'chav2'});
+      Usuario.hasMany(models.Cargo, { foreignKey: 'cargo_id' });
+      Usuario.hasMany(models.Demanda, { foreignKey: 'demanda_id' });
+      Usuario.belongsTo(models.Encaminhamento, { foreignKey: 'encaminhamento_id' });
     }
   }
   Usuario.init({
@@ -34,7 +33,7 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: false,
       validate: {
-        len:{
+        len: {
           args: 8,
           msg: "Senha precisa ter 8 caracteres."
         },
@@ -53,7 +52,7 @@ module.exports = (sequelize, DataTypes) => {
     cargo_id: {
       type: DataTypes.INTEGER,
       references: {
-        model: 'Cargo',
+        model: 'Cargos',
         key: 'id'
       },
       allowNull: false,
