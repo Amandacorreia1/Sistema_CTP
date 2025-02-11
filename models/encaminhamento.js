@@ -34,6 +34,10 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: false
     },
+    data:{
+      type: DataTypes.DATE, 
+      allowNull: false
+    }
   }, {
     sequelize,
     modelName: 'Encaminhamento',
