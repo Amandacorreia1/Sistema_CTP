@@ -6,7 +6,7 @@ const {
 module.exports = (sequelize, DataTypes) => {
   class Cargo extends Model {
     static associate(models) {
-      Cargo.BelongsTo(models.Usuario, { foreignKey: 'cargo_id' });
+      Cargo.hasMany(models.Usuario, { foreignKey: 'cargo_id' });
     }
   }
   Cargo.init({
