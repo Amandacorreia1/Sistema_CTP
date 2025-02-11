@@ -13,7 +13,6 @@ module.exports = (sequelize, DataTypes) => {
     matricula: {
       type: DataTypes.INTEGER,
       primaryKey: true,
-      autoIncrement: true,
     },
     nome: {
       type: DataTypes.STRING,
