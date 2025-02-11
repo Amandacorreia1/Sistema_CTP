@@ -40,10 +40,12 @@ module.exports = {
         onDelete: 'CASCADE'
       },
       descricao: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
+        allowNull: false
       },
       data: {
-        type: Sequelize.DATE
+        type: Sequelize.DATE,
+        allowNull: false
       },
       createdAt: {
         type: Sequelize.DATE,
