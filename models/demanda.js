@@ -7,7 +7,7 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
       Demanda.belongsTo(models.Usuario, { foreignKey: 'usuario_id' });
       Demanda.belongsToMany(models.AmparoLegal, { through: 'AmparoDemanda', foreignKey: 'demanda_id', otherKey: 'amparolegal_id' });
-      Demanda.belongsToMany(models.Aluno, { through: 'DemandaAluno', foreignKey: 'demanda_id', otherKey: 'matricula' });
+      Demanda.belongsTo(models.demandaaluno, { foreignKey: 'demandaaluno_id' });
       Demanda.hasMany(models.Encaminhamento, { foreignKey: 'encaminhamento_id' });
       Demanda.hasMany(models.IntervencaoDemanda, { foreignKey: 'intervencaodemanda_id' });
     }
