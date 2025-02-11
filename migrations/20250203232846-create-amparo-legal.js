@@ -4,23 +4,23 @@ module.exports = {
   async up(queryInterface, Sequelize) {
     await queryInterface.createTable('AmparoLegals', {
       id: {
+        type: Sequelize.INTEGER,
         allowNull: false,
         autoIncrement: true,
-        primaryKey: true,
-        type: Sequelize.INTEGER
+        primaryKey: true
       },
       nome: {
-        type: Sequelize.STRING,        
+        type: Sequelize.STRING,
         allowNull: false,
         unique: true
-    },
+      },
       createdAt: {
-        allowNull: false,
-        type: Sequelize.DATE
+        type: Sequelize.DATE,
+        defaultValue: Sequelize.NOW
       },
       updatedAt: {
-        allowNull: false,
-        type: Sequelize.DATE
+        type: Sequelize.DATE,
+        defaultValue: Sequelize.NOW
       }
     });
   },

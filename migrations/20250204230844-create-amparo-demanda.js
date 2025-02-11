@@ -4,17 +4,17 @@ module.exports = {
   async up(queryInterface, Sequelize) {
     await queryInterface.createTable('AmparoDemandas', {
       id: {
+        type: Sequelize.INTEGER,
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
-        type: Sequelize.INTEGER
       },
       demanda_id: {
         type: Sequelize.INTEGER,
         allowNull: false,
         references: {
-          model: 'Demandas', 
-          key: 'id' 
+          model: 'Demandas',
+          key: 'id'
         },
         onDelete: 'CASCADE',
         onUpdate: 'CASCADE'
@@ -23,19 +23,19 @@ module.exports = {
         type: Sequelize.INTEGER,
         allowNull: false,
         references: {
-          model: 'AmparoLegals', 
-          key: 'id' 
+          model: 'AmparoLegals',
+          key: 'id'
         },
-        onDelete: 'CASCADE', 
+        onDelete: 'CASCADE',
         onUpdate: 'CASCADE'
       },
       createdAt: {
-        allowNull: false,
-        type: Sequelize.DATE
+        type: Sequelize.DATE,
+        allowNull: false
       },
       updatedAt: {
-        allowNull: false,
-        type: Sequelize.DATE
+        type: Sequelize.DATE,
+        allowNull: false
       }
     });
   },

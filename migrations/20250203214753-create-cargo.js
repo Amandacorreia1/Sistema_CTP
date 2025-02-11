@@ -4,23 +4,21 @@ module.exports = {
   async up(queryInterface, Sequelize) {
     await queryInterface.createTable('Cargos', {
       id: {
+        type: Sequelize.INTEGER,
         allowNull: false,
         autoIncrement: true,
-        primaryKey: true,
-        type: Sequelize.INTEGER
+        primaryKey: true
       },
       nome: {
         type: Sequelize.ENUM,
-        values: ['Diretor Geral', 'Coodernador', 'Funcionario CTP',"Diretor Ensino","Professor","Aluno"],
+        values: ['Diretor Geral', 'Coodernador', 'Funcionario CTP', "Diretor Ensino", "Professor", "Aluno"],
         allowNull: false
       },
       createdAt: {
-        allowNull: false,
         type: Sequelize.DATE,
         defaultValue: Sequelize.NOW
       },
       updatedAt: {
-        allowNull: false,
         type: Sequelize.DATE,
         defaultValue: Sequelize.NOW
       }
