@@ -1,8 +1,10 @@
 'use strict';
-const {
-  Model
-} = require('sequelize');
-module.exports = (sequelize, DataTypes) => {
+import { Model } from 'sequelize';
+import bcrypt from 'bcrypt';
+
+import { DataTypes } from 'sequelize';
+
+export default (sequelize) => {
   class Usuario extends Model {
     static associate(models) {
       Usuario.belongsTo(models.Cargo, { foreignKey: 'cargo_id' });
@@ -62,6 +64,14 @@ module.exports = (sequelize, DataTypes) => {
   }, {
     sequelize,
     modelName: 'Usuario',
+    hooks: {
+      beforeCreate: async (usuario) => {
+        if (usuario.senha) {
+          const salt = await bcrypt.genSalt(10);
+          usuario.senha = await bcrypt.hash(usuario.senha, salt);
+        }
+      }
+    },
     tableName: 'Usuarios'
   });
   return Usuario;

@@ -1,9 +1,8 @@
 'use strict';
-const {
-  Model
-} = require('sequelize');
+import { Model}  from 'sequelize';
+import { DataTypes } from 'sequelize';
 
-module.exports = (sequelize, DataTypes) => {
+export default (sequelize) => {
   class Condicao extends Model {
     static associate(models) {
       Condicao.belongsToMany(models.Aluno, {
