@@ -1,4 +1,4 @@
-import db from '../models/index.js';
+/*import db from '../models/index.js';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -50,3 +50,4 @@ export const listarAlunos = async (req, res) => {
     }
 };
 
+*/
