@@ -1,6 +1,4 @@
 import db from '../models/index.js';  
-import { Op } from 'sequelize'; 
-
 export const listarCondicoes = async (req, res) => {
     try {
       const condicoes = await db.Condicao.findAll({
