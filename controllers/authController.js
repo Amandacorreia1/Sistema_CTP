@@ -1,4 +1,5 @@
 import db from '../models/index.js';
+import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
 import bcrypt from 'bcrypt';
 
@@ -8,20 +9,24 @@ export const cadastrarUsuario = async (req, res) => {
     const { nome, email, senha, matricula, cargo } = req.body;
 
     try {
-        const usuarioExistente = await db.Usuario.findOne({ 
+        const usuarioExistente = await db.Usuario.findOne({
             attributes: ['id', 'matricula', 'nome', 'senha', 'email', 'cargo_id'],
-            where: { matricula } 
+            where: { matricula }
         });
         if (usuarioExistente) {
             return res.status(400).json({ mensagem: 'Matrícula já está em uso.' });
         }
 
-        const emailExistente = await db.Usuario.findOne({ 
+        const emailExistente = await db.Usuario.findOne({
             attributes: ['id', 'matricula', 'nome', 'senha', 'email', 'cargo_id'],
-            where: { email } 
+            where: { email }
         });
         if (emailExistente) {
             return res.status(400).json({ mensagem: 'Email já está em uso.' });
+        }
+
+        if (senha.length < 8) {
+            return res.status(400).json({ mensagem: 'A senha deve ter no mínimo 8 caracteres.' });
         }
 
         const cargoEncontrado = await db.Cargo.findOne({ where: { nome: cargo } });
@@ -32,21 +37,51 @@ export const cadastrarUsuario = async (req, res) => {
         const salt = await bcrypt.genSalt(10);
         const senhaCriptografada = await bcrypt.hash(senha, salt);
 
-        const novoUsuario = await db.Usuario.create({ 
-            nome, 
-            email, 
-            senha: senhaCriptografada, 
+        const novoUsuario = await db.Usuario.create({
+            nome,
+            email,
+            senha: senhaCriptografada,
             matricula,
-            cargo_id: cargoEncontrado.id 
+            cargo_id: cargoEncontrado.id
         });
 
         const usuario = novoUsuario.get({ plain: true });
-        delete usuario.senha; 
+        delete usuario.senha;
 
         res.status(201).json({ mensagem: 'Usuário criado com sucesso', usuario });
 
     } catch (erro) {
         console.error(erro);
         res.status(500).json({ mensagem: 'Erro ao criar usuário' });
+    }
+};
+
+export const login = async (req, res) => {
+    const { email, senha } = req.body;
+
+    try {
+        const usuarioExistente = await db.Usuario.findOne({
+            attributes: ['id', 'matricula', 'nome', 'senha', 'email'],
+            where: { email }
+        });
+
+        if (!usuarioExistente) {
+            return res.status(404).json({ message: 'Usuário não encontrado.' });
+        }
+
+        const senhaValida = await bcrypt.compare(senha, usuarioExistente.senha);
+
+        if (!senhaValida) {
+            return res.status(401).json({ message: 'Senha inválida.' });
+        }
+
+        const token = jwt.sign({ id: usuarioExistente.id },
+            process.env.JWT_SECRET, { expiresIn: '1h' }
+        );
+
+        res.status(200).json({ message: 'Login bem-sucedido.', token });
+
+    } catch (error) {
+        res.status(500).json({ message: 'Erro ao fazer login.' });
     }
 };

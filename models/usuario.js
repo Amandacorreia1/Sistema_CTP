@@ -64,14 +64,6 @@ export default (sequelize) => {
   }, {
     sequelize,
     modelName: 'Usuario',
-    hooks: {
-      beforeCreate: async (usuario) => {
-        if (usuario.senha) {
-          const salt = await bcrypt.genSalt(10);
-          usuario.senha = await bcrypt.hash(usuario.senha, salt);
-        }
-      }
-    },
     tableName: 'Usuarios'
   });
   return Usuario;
