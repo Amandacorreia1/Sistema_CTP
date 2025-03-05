@@ -23,6 +23,7 @@ export default (sequelize) => {
   }, {
     sequelize,
     modelName: 'AmparoLegal',
+    tableName: 'AmparoLegals'
   });
   return AmparoLegal;
 };
