@@ -18,17 +18,14 @@ export default (sequelize) => {
       autoIncrement: true,
     },
     nome: {
-      type: DataTypes.ENUM,
-      values: ['Transtorno do Espectro Autista', 'TDAH(Transtorno do Déficit de Atenção com Hiperatividade)',
-        'Deficiência Auditiva', 'Deficiência Motora/Física', 'Deficiência Visual(cegueira ou baixa visão)',
-        'Transtornos do Desenvolvimento Global',
-        'Deficiência Intelectual', 'Deficiência Múltipla', 'Portador de Altas Habilidades', 'Outra'
-      ],
-      allowNull: false
+      type: DataTypes.STRING,
+      allowNull: false,
+      unique: true,  
     }
   }, {
     sequelize,
     modelName: 'Condicao',
+    tableName: 'Condicoes',
   });
 
   return Condicao;
