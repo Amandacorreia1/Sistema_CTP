@@ -1,7 +1,7 @@
 {
   "development": {
-    "username": "andre",
-    "password": "andre",
+    "username": "root",
+    "password": "aluno123",
     "database": "sistema_ctp",
     "host": "127.0.0.1",
     "dialect": "mysql"

@@ -1,12 +1,12 @@
 'use strict';
-const {
-  Model
-} = require('sequelize');
-module.exports = (sequelize, DataTypes) => {
+import { Model}  from 'sequelize';
+import { DataTypes } from 'sequelize';
+
+export default (sequelize) => {
   class Aluno extends Model {
     static associate(models) {
       Aluno.belongsToMany(models.Condicao, { through: 'CondicaoAluno', foreignKey: 'matricula', otherKey: 'condicao_id' });
-      Aluno.hasMany(models.demandaaluno, { foreignKey: 'demandaaluno_id'});
+      Aluno.hasMany(models.DemandaAluno, { foreignKey: 'demandaaluno_id'});
     }
   }
   Aluno.init({

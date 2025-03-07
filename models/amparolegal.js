@@ -1,8 +1,8 @@
 'use strict';
-const {
-  Model
-} = require('sequelize');
-module.exports = (sequelize, DataTypes) => {
+import { Model}  from 'sequelize';
+import { DataTypes } from 'sequelize';
+
+export default (sequelize) => {
   class AmparoLegal extends Model {
     static associate(models) {
       AmparoLegal.belongsToMany(models.Demanda, { through: 'AmparoDemandas', foreignKey: 'amparolegal_id', otherKey: 'demanda_id' });
@@ -23,6 +23,7 @@ module.exports = (sequelize, DataTypes) => {
   }, {
     sequelize,
     modelName: 'AmparoLegal',
+    tableName: 'AmparoLegals'
   });
   return AmparoLegal;
 };

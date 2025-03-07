@@ -1,9 +1,8 @@
 'use strict';
-const {
-  Model
-} = require('sequelize');
+import { Model}  from 'sequelize';
+import { DataTypes } from 'sequelize';
 
-module.exports = (sequelize, DataTypes) => {
+export default (sequelize) => {
   class Cargo extends Model {
     static associate(models) {
       Cargo.hasMany(models.Usuario, { foreignKey: 'cargo_id' });
@@ -17,7 +16,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     nome: {
       type: DataTypes.ENUM,
-      values: ['Diretor Geral', 'Coodernador', 'Funcionario CTP', "Diretor Ensino", "Professor", "Aluno"],
+      values: ["Aluno", 'Coodernador', "Diretor Ensino", 'Diretor Geral', 'Funcionario CTP', "Professor"],
       allowNull: false
     }
   }, {

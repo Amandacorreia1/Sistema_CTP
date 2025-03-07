@@ -1,8 +1,10 @@
 'use strict';
-const {
-  Model
-} = require('sequelize');
-module.exports = (sequelize, DataTypes) => {
+import { Model } from 'sequelize';
+import bcrypt from 'bcrypt';
+
+import { DataTypes } from 'sequelize';
+
+export default (sequelize) => {
   class Usuario extends Model {
     static associate(models) {
       Usuario.belongsTo(models.Cargo, { foreignKey: 'cargo_id' });

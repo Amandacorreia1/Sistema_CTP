@@ -1,12 +1,12 @@
 'use strict';
-const {
-  Model
-} = require('sequelize');
-module.exports = (sequelize, DataTypes) => {
+import { Model}  from 'sequelize';
+import { DataTypes } from 'sequelize';
+
+export default (sequelize) => {
   class DemandaAluno extends Model {
     static associate(models) {
-      DemandaAluno.belongsTo(models.Demanda, { foreignKey: 'demanda_id'});
-      DemandaAluno.belongsTo(models.Aluno, { foreignKey: 'matricula'}); 
+      DemandaAluno.belongsTo(models.Demanda, { foreignKey: 'demanda_id' });
+      DemandaAluno.belongsTo(models.Aluno, { foreignKey: 'matricula' });
     }
   }
   DemandaAluno.init({
@@ -25,13 +25,15 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
       references: { model: 'Alunos', key: 'id' }
     },
-    disciplina:{
+    disciplina: {
       type: DataTypes.STRING,
       allowNull: true
     },
+  }, {
 
     sequelize,
     modelName: 'DemandaAluno',
-  });
+  },
+  );
   return DemandaAluno;
 };

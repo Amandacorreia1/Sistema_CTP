@@ -1,30 +1,32 @@
-'use strict';
-/** @type {import('sequelize-cli').Migration} */
-module.exports = {
-  async up(queryInterface, Sequelize) {
+// migrations/20250203214753-create-cargo.js
+import { Sequelize } from 'sequelize';
+
+export default {
+  async up(queryInterface) {
     await queryInterface.createTable('Cargos', {
       id: {
         type: Sequelize.INTEGER,
         allowNull: false,
         autoIncrement: true,
-        primaryKey: true
+        primaryKey: true,
       },
       nome: {
         type: Sequelize.ENUM,
-        values: ['Diretor Geral', 'Coodernador', 'Funcionario CTP', "Diretor Ensino", "Professor", "Aluno"],
-        allowNull: false
+        values: ["Aluno", 'Coordenador', "Diretor Ensino", 'Diretor Geral', 'Funcionario CTP', "Professor"],
+        allowNull: false,
       },
       createdAt: {
         type: Sequelize.DATE,
-        defaultValue: Sequelize.NOW
+        defaultValue: Sequelize.NOW,
       },
       updatedAt: {
         type: Sequelize.DATE,
-        defaultValue: Sequelize.NOW
-      }
+        defaultValue: Sequelize.NOW,
+      },
     });
   },
-  async down(queryInterface, Sequelize) {
+
+  async down(queryInterface) {
     await queryInterface.dropTable('Cargos');
-  }
+  },
 };
