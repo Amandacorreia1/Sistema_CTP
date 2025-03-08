@@ -1,9 +1,9 @@
 'use strict';
 
-import { QueryInterface } from 'sequelize';
+const { QueryInterface } = require('sequelize');
 
 /** @type {import('sequelize-cli').Seeder} */
-export default {
+module.exports = {
   async up(queryInterface) {
     const now = new Date();
     await queryInterface.bulkInsert('AmparoLegals', [
