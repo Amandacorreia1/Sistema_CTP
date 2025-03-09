@@ -5,10 +5,10 @@ import { DataTypes } from 'sequelize';
 export default (sequelize) => {
   class Encaminhamento extends Model {
     static associate(models) {
-      Encaminhamento.hasOne(models.Usuario, { foreignKey: 'remetente_id' });
-      Encaminhamento.hasOne(models.Usuario, { foreignKey: 'destinario_id' });
-      Encaminhamento.belongsTo(models.IntervencaoDemanda, { foreignKey: 'intervencaodemanda_id' });
-      Encaminhamento.belongsTo(models.Demanda, { foreignKey: 'demanda_id' });
+      Encaminhamento.belongsTo(models.Usuario, { foreignKey: 'usuario_id', as: 'Remetente' });
+      Encaminhamento.belongsTo(models.Usuario, { foreignKey: 'destinatario', as: 'Destinatario' });
+      Encaminhamento.belongsTo(models.IntervencaoDemanda, { foreignKey: 'intervencaodemanda_id' });// ainda vai ter isso??
+      Encaminhamento.belongsTo(models.Demanda, { foreignKey: 'demanda_id', as:'Demanda' });
     }
   }
   Encaminhamento.init({
