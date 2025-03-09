@@ -1,7 +1,4 @@
 import db from '../models/index.js';
-import dotenv from 'dotenv';
-
-dotenv.config();
 
 export const criarEncaminhamento = async (req, res) => {
     const { usuario_id } = req.body;

@@ -1,5 +1,5 @@
 import express from 'express';
-import {criarEncaminhamento,listarEncaminhamentosPorUsuario,listarEncaminhamentosPorDemanda,listarEncaminhamentos,editarEncaminhamento,excluirEncaminhamento} from "../controllers/encaminhamentoController";
+import { criarEncaminhamento,listarEncaminhamentosPorUsuario,listarEncaminhamentosPorDemanda,listarEncaminhamentos,editarEncaminhamento,excluirEncaminhamento } from "../controllers/encaminhamentoController.js";
 
 const router = express.Router();
 
