@@ -9,7 +9,9 @@ export default (sequelize) => {
     static associate(models) {
       Usuario.belongsTo(models.Cargo, { foreignKey: 'cargo_id' });
       Usuario.hasMany(models.Demanda, { foreignKey: 'usuario_id' });
-      Usuario.belongsTo(models.Encaminhamento, { foreignKey: 'encaminhamento_id' });
+      Usuario.hasMany(models.Encaminhamento, { foreignKey: 'usuario_id', as: 'EncaminhamentosRemetente' });
+      Usuario.hasMany(models.Encaminhamento, { foreignKey: 'destinatario', as: 'EncaminhamentosDestinatario' });
+
     }
   }
   Usuario.init({
