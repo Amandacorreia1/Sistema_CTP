@@ -85,3 +85,36 @@ export const login = async (req, res) => {
         res.status(500).json({ message: 'Erro ao fazer login.' });
     }
 };
+
+export const recuperarSenha = async (req, res) => {
+    const { email } = req.body;
+
+    try {
+        const emailExistente = await db.Usuario.findOne({
+            attributes: ['id', 'matricula', 'nome', 'senha', 'email'],
+            where: { email }
+        });
+
+        if (!emailExistente) {
+            return res.status(404).json({ message: 'E-mail não encontrado.' });
+        }
+
+        if (emailExistente) {
+            return res.status(400).json({ mensagem: 'Email existente.' });
+        }
+
+    } catch (error) {
+        return res.status(500).json({ message: "Erro ao solicitar recuperação de senha!" });
+    }
+};
+
+export const redefinirSenha = async (req, res) => {
+    const { novaSenha, confirmarSenha } = req.body;
+
+    try {
+
+    } catch (error) {
+
+    }
+};
+
