@@ -8,7 +8,8 @@ export default (sequelize) => {
       Encaminhamentos.belongsTo(models.Usuario, { foreignKey: 'usuario_id', as: 'Remetente' });
       Encaminhamentos.belongsTo(models.Usuario, { foreignKey: 'destinatario_id', as: 'Destinatario' });
       Encaminhamentos.belongsTo(models.Demanda, { foreignKey: 'demanda_id', as:'Demanda' });
-    }
+      Encaminhamentos.hasMany(models.IntervencaoDemanda, { foreignKey: 'encaminhamento_id', as:'Intervencao' });
+      }
   }
   Encaminhamentos.init({
     id: {

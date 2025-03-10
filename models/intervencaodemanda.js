@@ -5,8 +5,9 @@ import { DataTypes } from 'sequelize';
 export default (sequelize) => {
   class IntervencaoDemanda extends Model {
     static associate(models) {
-      IntervencaoDemanda.belongsTo(models.Demanda, { foreignKey: 'demanda_id' });
-      IntervencaoDemanda.belongsTo(models.Intervencao, { foreignKey: 'intervencao_id' });
+      IntervencaoDemanda.belongsTo(models.Demanda, { foreignKey: 'demanda_id', as: 'Demanda' });
+      IntervencaoDemanda.belongsTo(models.Intervencao, { foreignKey: 'intervencao_id', as: 'Intervencao' });
+      IntervencaoDemanda.belongsTo(models.Encaminhamentos, { foreignKey: 'encaminhamento_id', as: 'Encaminhamentos' });
     }
   }
   IntervencaoDemanda.init({
@@ -26,6 +27,13 @@ export default (sequelize) => {
       allowNull: false,
       references: { model: 'Demandas', key: 'id' }
     },
+    encaminhamento_id:{
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: { model: 'Encaminhamentos', key: 'id' },
+      onUpdate: 'CASCADE',
+      onDelete: 'RESTRICT'
+    },
     data: {
       type: DataTypes.DATE,
       allowNull: false
@@ -37,6 +45,7 @@ export default (sequelize) => {
   }, {
     sequelize,
     modelName: 'IntervencaoDemanda',
+    tableName: 'IntervencaoDemanda'
   });
 
   return IntervencaoDemanda;

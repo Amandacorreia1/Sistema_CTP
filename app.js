@@ -22,7 +22,7 @@ app.use('/api', demandaRoutes);
 app.use('/api', intervencaoRoutes);
 app.use('/api', usuarioRoutes);
 app.use('/api', alunoRoutes);
-app.search('/api', intervencaoDemandaRoutes);
+app.use('/api', intervencaoDemandaRoutes);
 app.use('/api', demandaAlunoRoutes);
 
 export default app;
