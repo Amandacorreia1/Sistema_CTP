@@ -20,7 +20,7 @@ export default (sequelize) => {
       allowNull: false,
       references: { model: 'Demandas', key: 'id' }
     },
-    matricula: {
+    aluno_id: {
       type: DataTypes.INTEGER,
       allowNull: false,
       references: { model: 'Alunos', key: 'matricula' }
