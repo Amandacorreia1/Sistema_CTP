@@ -8,7 +8,7 @@ import demandaRoutes from './routes/demandaRoutes.js';
 import intervencaoRoutes from './routes/intervencaoRoutes.js';
 import usuarioRoutes from './routes/usuarioRoutes.js';
 import alunoRoutes from './routes/alunoRoutes.js';
-
+import intervencaoDemandaRoutes from './routes/intervencaoDemandaRoutes.js';
 const app = express();
 
 app.use(express.json());
@@ -20,5 +20,6 @@ app.use('/api', demandaRoutes);
 app.use('/api', intervencaoRoutes);
 app.use('/api', usuarioRoutes);
 app.use('/api', alunoRoutes);
+app.search('/api', intervencaoDemandaRoutes);
 
 export default app;
