@@ -3,7 +3,7 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-const buscarAlunoRu = async (matricula) => {
+/*const buscarAlunoRu = async (matricula) => {
     return {
         matricula,
         nome: '',
@@ -11,6 +11,7 @@ const buscarAlunoRu = async (matricula) => {
         curso: '',
     };
 };
+*/
 
 export const buscarAluno = async (req, res) => {
     const { matricula } = req.params;
@@ -22,8 +23,7 @@ export const buscarAluno = async (req, res) => {
             where: { matricula } 
         });
 
-        // Se o aluno não existir, busca no ru
-        if (!aluno) {
+        /*if (!aluno) {
             const alunoRu = await buscarAlunoRu(matricula);
             if (!alunoRu) {
                 return res.status(404).json({ mensagem: 'Aluno não encontrado' });
@@ -32,6 +32,7 @@ export const buscarAluno = async (req, res) => {
             // Salva o aluno no banco da ctp.
             aluno = await db.Aluno.create(alunoRu);
         }
+            */
 
         res.status(200).json(aluno);
     } catch (erro) {
@@ -42,11 +43,20 @@ export const buscarAluno = async (req, res) => {
 
 export const listarAlunos = async (req, res) => {
     try {
-        const alunos = await db.Aluno.findAll({ attributes: ['matricula', 'nome', 'email', 'curso'] });
+        const alunos = await db.Aluno.findAll({ 
+            attributes: ['matricula', 'nome', 'email', 'curso'],
+            where: {
+                nome: { [db.Sequelize.Op.ne]: '' }, 
+                email: { [db.Sequelize.Op.ne]: '' }, 
+                curso: { [db.Sequelize.Op.ne]: '' }  
+            }
+        });
+
         res.status(200).json(alunos);
     } catch (erro) {
         console.error(erro);
         res.status(500).json({ mensagem: 'Erro ao buscar alunos' });
     }
 };
+
 

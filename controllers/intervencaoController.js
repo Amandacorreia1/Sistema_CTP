@@ -3,29 +3,19 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
+// Criar Intervenção
 export const criarIntervencao = async (req, res) => {
-    const { usuario_id, demanda_id, descricao } = req.body;
+    const { descricao } = req.body;  // Como você mencionou que só precisa da descrição
 
     try {
-        const usuario_res = await db.Usuario.findByPk(usuario_id);
-        if (!usuario_res) {
-            return res.status(404).json({ error: 'Usuário não encontrado' });
-        }
-
-        const demanda_res = await db.Demanda.findByPk(demanda_id);
-        if (!demanda_res) {
-            return res.status(404).json({ error: 'Demanda não encontrada' });
-        }
-
+        // Criando a nova intervenção
         const novaIntervencao = await db.Intervencao.create({
             descricao,
-            usuario_id,
-            demanda_id
         });
 
         return res.status(201).json({
             mensagem: 'Intervenção criada com sucesso!',
-            intervencao: novaIntervencao
+            intervencao: novaIntervencao,
         });
     } catch (error) {
         console.error(error);
@@ -33,59 +23,44 @@ export const criarIntervencao = async (req, res) => {
     }
 };
 
+// Listar todas as Intervenções
+export const listarIntervencao = async (req, res) => {
+    try {
+        // Buscando todas as intervenções
+        const intervencao_res = await db.Intervencao.findAll();
+
+        return res.status(200).json({
+            intervencao: intervencao_res,
+            mensagem: "Todas as intervenções carregadas com sucesso!",
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Erro ao listar as intervenções' });
+    }
+};
+
+// Listar Intervenções por Demanda
 export const listarIntervencaoPorDemanda = async (req, res) => {
     const { demanda_id } = req.params;
 
     try {
+        // Verificando se a demanda existe
         const demanda_res = await db.Demanda.findByPk(demanda_id);
         if (!demanda_res) {
             return res.status(404).json({ error: 'Demanda não encontrada' });
         }
 
+        // Buscando as intervenções associadas à demanda
         const intervencao_res = await db.Intervencao.findAll({
             where: { demanda_id },
-            include: [
-                {
-                    model: db.Usuario,
-                    as: 'Usuario',
-                    attributes: ['nome'] 
-                },
-            ]
         });
 
         return res.status(200).json({
             intervencao: intervencao_res,
-            mensagem: "Intervenções da demanda carregadas com sucesso!"
+            mensagem: "Intervenções da demanda carregadas com sucesso!",
         });
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: 'Erro ao listar as intervenções da demanda' });
-    }
-};
-
-export const listarIntervencao = async (req, res) => {
-    try {
-        const intervencao_res = await db.Intervencao.findAll({
-            include: [
-                {
-                    model: db.Usuario,
-                    as: 'Usuario',
-                    attributes: ['nome'] 
-                },
-                {
-                    model: db.Demanda,
-                    as: 'Demanda',
-                    attributes: ['descricao'] 
-                },
-            ]
-        });
-
-        return res.status(200).json({
-            intervencao: intervencao_res,
-            mensagem: "Todas as intervenções carregadas com sucesso!"
-        });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: 'Erro ao listar as intervenções' });
     }
 };

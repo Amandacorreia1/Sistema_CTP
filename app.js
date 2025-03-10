@@ -7,6 +7,7 @@ import encaminhamentoRoutes from './routes/encaminhamentoRoutes.js';
 import demandaRoutes from './routes/demandaRoutes.js';
 import intervencaoRoutes from './routes/intervencaoRoutes.js';
 import usuarioRoutes from './routes/usuarioRoutes.js';
+import alunoRoutes from './routes/alunoRoutes.js';
 
 const app = express();
 
@@ -18,5 +19,6 @@ app.use('/api', encaminhamentoRoutes);
 app.use('/api', demandaRoutes);
 app.use('/api', intervencaoRoutes);
 app.use('/api', usuarioRoutes);
+app.use('/api', alunoRoutes);
 
 export default app;

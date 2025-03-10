@@ -23,7 +23,7 @@ export default (sequelize) => {
     matricula: {
       type: DataTypes.INTEGER,
       allowNull: false,
-      references: { model: 'Alunos', key: 'id' }
+      references: { model: 'Alunos', key: 'matricula' }
     },
     disciplina: {
       type: DataTypes.STRING,

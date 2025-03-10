@@ -23,6 +23,7 @@ export default (sequelize) => {
     {
       sequelize,
       modelName: 'Intervencao',
+      tableName: 'Intervencoes',
     });
   return Intervencao;
 };
