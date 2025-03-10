@@ -73,7 +73,32 @@ export const buscarIntervencaoDemandaPorId = async (req, res) => {
   const { id } = req.params;
 
   try {
-    const intervencaoDemanda = await db.IntervencaoDemanda.findByPk(id);
+    const intervencaoDemanda = await db.IntervencaoDemanda.findByPk(id, {
+      include: [
+        {
+          model: db.Demanda,
+          as: 'Demanda',
+          attributes: ['descricao']
+        },
+        {
+          model: db.Intervencao,
+          as: 'Intervencao',
+          attributes: ['descricao']
+        },
+        {
+          model: db.Encaminhamentos,
+          as: 'Encaminhamentos',
+          attributes: ['usuario_id'],
+          include: [
+            {
+              model: db.Usuario,
+              as: 'Remetente',
+              attributes: ['nome']
+            }
+          ]
+        }
+      ]
+    });
 
     if (!intervencaoDemanda) {
       return res.status(404).json({ mensagem: 'Intervenção de demanda não encontrada.' });
@@ -81,9 +106,7 @@ export const buscarIntervencaoDemandaPorId = async (req, res) => {
 
     return res.status(200).json(intervencaoDemanda);
   } catch (erro) {
-    console.error(erro);
+    console.error('Erro ao buscar intervenção de demanda:', erro.message);
     return res.status(500).json({ mensagem: 'Erro ao buscar intervenção de demanda.' });
   }
 };
-
-

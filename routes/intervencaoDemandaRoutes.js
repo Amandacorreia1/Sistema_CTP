@@ -9,7 +9,7 @@ const router = express.Router();
 
 router.post('/intervencoesdemandas', criarIntervencaoDemanda); 
 router.get('/intervencoesdemandas', listarIntervencoesDemandas); 
-router.get('/intervencoesdemandas/:id', buscarIntervencaoDemandaPorId);
+router.get('/intervdemandas/:id', buscarIntervencaoDemandaPorId);
 
 
 export default router;

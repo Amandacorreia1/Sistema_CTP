@@ -45,7 +45,8 @@ export default (sequelize) => {
   }, {
     sequelize,
     modelName: 'IntervencaoDemanda',
-    tableName: 'IntervencaoDemanda'
+    tableName: 'IntervencaoDemanda',
+    underscored: true
   });
 
   return IntervencaoDemanda;
