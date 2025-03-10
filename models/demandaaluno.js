@@ -6,7 +6,7 @@ export default (sequelize) => {
   class DemandaAluno extends Model {
     static associate(models) {
       DemandaAluno.belongsTo(models.Demanda, { foreignKey: 'demanda_id' });
-      DemandaAluno.belongsTo(models.Aluno, { foreignKey: 'matricula' });
+      DemandaAluno.belongsTo(models.Aluno, { foreignKey: 'aluno_id' });
     }
   }
   DemandaAluno.init({
