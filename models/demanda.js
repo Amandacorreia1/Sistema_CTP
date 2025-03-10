@@ -8,7 +8,6 @@ export default (sequelize) => {
       Demanda.belongsTo(models.Usuario, { foreignKey: 'usuario_id' });
       Demanda.belongsToMany(models.AmparoLegal, { through: 'AmparoDemandas', foreignKey: 'demanda_id', otherKey: 'amparolegal_id' });
       Demanda.hasMany(models.DemandaAluno, { foreignKey: 'demandaaluno_id' });
-      Demanda.hasMany(models.Encaminhamento, { foreignKey: 'encaminhamento_id' });
       Demanda.hasMany(models.IntervencaoDemanda, { foreignKey: 'intervencaodemanda_id' });
     }
   }

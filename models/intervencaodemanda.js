@@ -7,7 +7,6 @@ export default (sequelize) => {
     static associate(models) {
       IntervencaoDemanda.belongsTo(models.Demanda, { foreignKey: 'demanda_id' });
       IntervencaoDemanda.belongsTo(models.Intervencao, { foreignKey: 'intervencao_id' });
-      IntervencaoDemanda.belongsTo(models.Encaminhamento, { foreignKey: 'encaminhamento_id' });
     }
   }
   IntervencaoDemanda.init({

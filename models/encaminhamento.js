@@ -3,15 +3,14 @@ import { Model}  from 'sequelize';
 import { DataTypes } from 'sequelize';
 
 export default (sequelize) => {
-  class Encaminhamento extends Model {
+  class Encaminhamentos extends Model {
     static associate(models) {
-      Encaminhamento.belongsTo(models.Usuario, { foreignKey: 'usuario_id', as: 'Remetente' });
-      Encaminhamento.belongsTo(models.Usuario, { foreignKey: 'destinatario', as: 'Destinatario' });
-      Encaminhamento.belongsTo(models.IntervencaoDemanda, { foreignKey: 'intervencaodemanda_id' });// ainda vai ter isso??
-      Encaminhamento.belongsTo(models.Demanda, { foreignKey: 'demanda_id', as:'Demanda' });
+      Encaminhamentos.belongsTo(models.Usuario, { foreignKey: 'usuario_id', as: 'Remetente' });
+      Encaminhamentos.belongsTo(models.Usuario, { foreignKey: 'destinatario_id', as: 'Destinatario' });
+      Encaminhamentos.belongsTo(models.Demanda, { foreignKey: 'demanda_id', as:'Demanda' });
     }
   }
-  Encaminhamento.init({
+  Encaminhamentos.init({
     id: {
       type: DataTypes.INTEGER,
       allowNull: false,
@@ -20,15 +19,33 @@ export default (sequelize) => {
     },
     usuario_id: {
       type: DataTypes.INTEGER,
-      allowNull: false
+      allowNull: false,
+      references: {
+        model: 'Usuarios',
+        key: 'id',
+      },
+      onDelete: 'RESTRICT',
+      onUpdate: 'CASCADE',
     },
     demanda_id: {
       type: DataTypes.INTEGER,
-      allowNull: false
+      allowNull: false,
+      references: {
+        model: 'Demanda',
+        key: 'id',
+      },
+      onDelete: 'RESTRICT',
+      onUpdate: 'CASCADE',
     },
-    destinatario: {
+    destinatario_id: {
       type: DataTypes.INTEGER,
-      allowNull: false
+      allowNull: false,
+      references: {
+        model: 'Usuarios',
+        key: 'id',
+      },
+      onDelete: 'RESTRICT',
+      onUpdate: 'CASCADE',
     },
     descricao: {
       type: DataTypes.STRING,
@@ -40,7 +57,7 @@ export default (sequelize) => {
     }
   }, {
     sequelize,
-    modelName: 'Encaminhamento',
+    modelName: 'Encaminhamentos',
   });
-  return Encaminhamento;
+  return Encaminhamentos;
 };
