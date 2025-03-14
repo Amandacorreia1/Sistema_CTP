@@ -1,11 +1,10 @@
 'use strict';
 
-const { QueryInterface } = require('sequelize');
-
-/** @type {import('sequelize-cli').Seeder} */
+/** @type {import('sequelize-cli').Migration} */
 module.exports = {
-  async up(queryInterface) {
+  async up(queryInterface, Sequelize) {
     const now = new Date();
+
     await queryInterface.bulkInsert('Condicoes', [
       {nome: 'Transtorno do Espectro Autista', createdAt: now, updatedAt: now},
       {nome: 'TDAH (Transtorno do Déficit de Atenção com Hiperatividade)', createdAt: now,updatedAt: now},
@@ -20,7 +19,7 @@ module.exports = {
     ]);
   },
 
-  async down(queryInterface) {
+  async down(queryInterface, Sequelize) {
     await queryInterface.bulkDelete('Condicoes', null, {});
   }
 };
