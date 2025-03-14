@@ -2,9 +2,9 @@
 
 const { QueryInterface } = require('sequelize');
 
-/** @type {import('sequelize-cli').Seeder} */
+/** @type {import('sequelize-cli').Migration} */
 module.exports = {
-  async up(queryInterface) {
+  async up(queryInterface, Sequelize) {
     const now = new Date();
     await queryInterface.bulkInsert('AmparoLegals', [
       { nome: 'Solicitar à coordenadoria de seu curso orientação para solução de eventuais dificuldades na vida acadêmica', createdAt: now, updatedAt: now },
@@ -14,7 +14,7 @@ module.exports = {
     ]);
   },
 
-  async down(queryInterface) {
+  async down(queryInterface, Sequelize) {
     await queryInterface.bulkDelete('AmparoLegals', null, {});
   }
 };
