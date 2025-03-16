@@ -1,11 +1,13 @@
 import express from "express";
 
 import { listarCondicoes, addCondicao, removeCondicao } from '../controllers/condicaoController.js';
+import {restringirAdmin} from '..middlewares/restringirAdmin';
+import { autenticarToken} from '../middlewares/authMiddlware.js';
 
 const router = express.Router();
 
-router.get('/condicoes', listarCondicoes);
-router.post('/condicoes', addCondicao);
-router.delete('/condicoes/:id', removeCondicao);
+router.get('/condicoes', autenticarToken, restringirAdmin(), listarCondicoes);
+router.post('/condicoes', autenticarToken, restringirAdmin(), addCondicao);
+router.delete('/condicoes/:id', autenticarToken, restringirAdmin(), removeCondicao);
 
 export default router;
