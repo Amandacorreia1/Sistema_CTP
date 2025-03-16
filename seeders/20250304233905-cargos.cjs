@@ -10,7 +10,8 @@ module.exports = {
       { nome: 'Diretor Ensino', createdAt: now, updatedAt: now },
       { nome: 'Diretor Geral', createdAt: now, updatedAt: now },
       { nome: 'Funcionario CTP', createdAt: now, updatedAt: now },
-      { nome: 'Professor', createdAt: now, updatedAt: now }
+      { nome: 'Professor', createdAt: now, updatedAt: now },
+      { nome: 'Admin', createdAt: now, updatedAt: now }
     ]);
   },
 
@@ -18,4 +19,3 @@ module.exports = {
     await queryInterface.bulkDelete('Cargos', null, {});
   }
 };
-

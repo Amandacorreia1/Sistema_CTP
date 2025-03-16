@@ -1,5 +1,5 @@
 'use strict';
-import { Model}  from 'sequelize';
+import { Model } from 'sequelize';
 import { DataTypes } from 'sequelize';
 
 export default (sequelize) => {
@@ -16,7 +16,7 @@ export default (sequelize) => {
     },
     nome: {
       type: DataTypes.ENUM,
-      values: ['Coodernador', "Diretor Ensino", 'Diretor Geral', 'Funcionario CTP', "Professor"],
+      values: ['Coordenador', 'Diretor Ensino', 'Diretor Geral', 'Funcionario CTP', 'Professor', 'Admin'],
       allowNull: false
     }
   }, {
