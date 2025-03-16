@@ -1,8 +1,8 @@
 
-const restringirAdmin = (rotasRestritas) => {
+const restringirAdmin = () => {
     return (req, res, next) => {
-        if (req.user && req.user.role === 'admin' && rotasRestritas.includes(req.path)) {
-            return res.status(403).json({ mensagem: 'Acesso negado. Administradores não têm permissão nesta rota.' });
+        if (req.usuario && req.usuario.cargo === 'admin') {
+            return res.status(403).json({ mensagem: 'Acesso negado.' });
         }
         next();
     };
