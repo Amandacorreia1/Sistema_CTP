@@ -1,11 +1,7 @@
 import express from 'express';
-import {
-    criarIntervencao,
-    listarIntervencao
-} from '../controllers/intervencaoController.js';
+import { criarIntervencao, listarIntervencao } from '../controllers/intervencaoController.js';
 import { autenticarToken } from '../middlewares/authMiddlware.js';
 import { restringirAdmin } from '../middlewares/restringirAdmin.js';
-
 
 const router = express.Router();
 

@@ -2,7 +2,7 @@ import express from "express";
 
 import { listarCondicoes, addCondicao, removeCondicao } from '../controllers/condicaoController.js';
 import { restringirAdmin } from '../middlewares/restringirAdmin.js';
-import { autenticarToken} from '../middlewares/authMiddlware.js';
+import { autenticarToken } from '../middlewares/authMiddlware.js';
 
 const router = express.Router();
 
