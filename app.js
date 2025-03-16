@@ -10,8 +10,17 @@ import usuarioRoutes from './routes/usuarioRoutes.js';
 import alunoRoutes from './routes/alunoRoutes.js';
 import intervencaoDemandaRoutes from './routes/intervencaoDemandaRoutes.js';
 import demandaAlunoRoutes from './routes/demandaalunoRoutes.js';
+import cargoRoutes from './routes/cargoRoutes.js';
+import cors from 'cors';
 
 const app = express();
+
+app.use(cors({
+    origin: "http://localhost:3001",
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true 
+}));
 
 app.use(express.json());
 app.use('/api/auth', authRoutes);
@@ -24,5 +33,6 @@ app.use('/api', usuarioRoutes);
 app.use('/api', alunoRoutes);
 app.use('/api', intervencaoDemandaRoutes);
 app.use('/api', demandaAlunoRoutes);
+app.use('/api',cargoRoutes);
 
 export default app;

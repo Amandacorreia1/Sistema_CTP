@@ -6,6 +6,7 @@ import bcrypt from 'bcrypt';
 dotenv.config();
 
 export const cadastrarUsuario = async (req, res) => {
+    console.log(req.body)
     const { nome, email, senha, matricula, cargo } = req.body;
 
     try {
@@ -29,7 +30,7 @@ export const cadastrarUsuario = async (req, res) => {
             return res.status(400).json({ mensagem: 'A senha deve ter no mínimo 8 caracteres.' });
         }
 
-        const cargoEncontrado = await db.Cargo.findOne({ where: { nome: cargo } });
+        const cargoEncontrado = await db.Cargo.findByPk(cargo);
 
         if (!cargoEncontrado) {
             return res.status(400).json({ mensagem: 'Cargo não encontrado. Cadastre o cargo antes de criar o usuário.' });
