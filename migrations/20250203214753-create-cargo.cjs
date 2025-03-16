@@ -1,4 +1,3 @@
-
 module.exports = {
   async up(queryInterface, Sequelize) {
     await queryInterface.createTable('Cargos', {
@@ -10,7 +9,7 @@ module.exports = {
       },
       nome: {
         type: Sequelize.ENUM,
-        values: ['Coordenador', "Diretor Ensino", 'Diretor Geral', 'Funcionario CTP', "Professor"],
+        values: ['Coordenador', 'Diretor Ensino', 'Diretor Geral', 'Funcionario CTP', 'Professor', 'Admin'],
         allowNull: false,
       },
       createdAt: {
