@@ -10,7 +10,7 @@ module.exports = {
       },
       nome: {
         type: Sequelize.ENUM,
-        values: ["Aluno", 'Coordenador', "Diretor Ensino", 'Diretor Geral', 'Funcionario CTP', "Professor"],
+        values: ['Coordenador', "Diretor Ensino", 'Diretor Geral', 'Funcionario CTP', "Professor"],
         allowNull: false,
       },
       createdAt: {

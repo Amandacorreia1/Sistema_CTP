@@ -6,7 +6,6 @@ module.exports = {
     const now = new Date();
 
     await queryInterface.bulkInsert('Cargos', [
-      { nome: 'Aluno', createdAt: now, updatedAt: now },
       { nome: 'Coordenador', createdAt: now, updatedAt: now },
       { nome: 'Diretor Ensino', createdAt: now, updatedAt: now },
       { nome: 'Diretor Geral', createdAt: now, updatedAt: now },

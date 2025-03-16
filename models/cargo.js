@@ -16,7 +16,7 @@ export default (sequelize) => {
     },
     nome: {
       type: DataTypes.ENUM,
-      values: ["Aluno", 'Coodernador', "Diretor Ensino", 'Diretor Geral', 'Funcionario CTP', "Professor"],
+      values: ['Coodernador', "Diretor Ensino", 'Diretor Geral', 'Funcionario CTP', "Professor"],
       allowNull: false
     }
   }, {
