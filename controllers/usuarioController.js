@@ -3,7 +3,7 @@ import db from '../models/index.js';
 export const buscarTodosUsuarios = async (req, res) => {
   try {
     const usuarios = await db.Usuario.findAll({
-      attributes: ['nome', 'email', 'matricula', 'cargo_id'],
+      attributes: ['id', 'nome', 'email', 'matricula', 'cargo_id'],
       include: [{ model: db.Cargo, as: 'Cargo' }], 
     });
     res.status(200).json({ message: 'Usuários recuperados com sucesso', usuarios });

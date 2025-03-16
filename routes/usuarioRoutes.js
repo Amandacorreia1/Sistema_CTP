@@ -6,10 +6,11 @@ import {
   editarUsuario,
   excluirUsuario,
 } from '../controllers/usuarioController.js';
+import { autenticarToken, authorizeRole } from '../middlewares/authMiddlware.js';
 
 const router = express.Router();
 
-router.get('/usuarios', buscarTodosUsuarios); 
+router.get('/usuarios', autenticarToken, authorizeRole('Admin'), buscarTodosUsuarios); 
 router.get('/usuarios/:nome', buscarUsuarioPorNome); 
 router.get('/usuario/:id', buscarUsuariosPorId); 
 router.put('/usuarios/:id', editarUsuario);

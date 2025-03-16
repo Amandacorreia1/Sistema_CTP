@@ -63,7 +63,12 @@ export const login = async (req, res) => {
     try {
         const usuarioExistente = await db.Usuario.findOne({
             attributes: ['id', 'matricula', 'nome', 'senha', 'email'],
-            where: { email }
+            where: { email },
+            include: [{
+                model: db.Cargo,
+                as: 'Cargo',
+                attributes: ['nome']
+            }] 
         });
 
         if (!usuarioExistente) {
@@ -76,7 +81,7 @@ export const login = async (req, res) => {
             return res.status(401).json({ message: 'Senha inválida.' });
         }
 
-        const token = jwt.sign({ id: usuarioExistente.id },
+        const token = jwt.sign({ id: usuarioExistente.id, cargo:usuarioExistente.Cargo.nome },
             process.env.JWT_SECRET, { expiresIn: '1h' }
         );
 

@@ -16,3 +16,17 @@ export const autenticarToken = (req, res, next) => {
         next();
     });
 };
+
+export const authorizeRole = (role) => {
+    return (req, res, next) => {
+        try{
+            if (req.usuario.cargo !== role) {
+                return res.status(403).json({ message: 'Acesso negado' });
+            }
+            next();
+
+        } catch (error){
+            return res.status(500).json({ mensagem: 'Erro no servidor.' });
+        }
+    };
+  }; 
