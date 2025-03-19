@@ -131,3 +131,46 @@ export const usuariosPorCargo = async (req, res) => {
     res.status(500).json({ message: 'Erro ao buscar usuários por cargo' });
   }
 };
+
+export const UsuariosPorNomeOuCargo = async (req, res) => {
+  const { termo } = req.params;
+
+  console.log('Buscando por termo:', termo); 
+
+  if (!termo) {
+    return res.status(400).json({ message: 'O termo de busca é obrigatório' });
+  }
+
+  try {
+    const usuarios = await db.Usuario.findAll({
+      where: {
+        [db.Sequelize.Op.or]: [
+          { nome: { [db.Sequelize.Op.like]: `%${termo}%` } },
+          {
+            cargo_id: {
+              [db.Sequelize.Op.in]: db.sequelize.literal(
+                `(SELECT id FROM Cargos WHERE nome LIKE '%${termo}%')`
+              )
+            }
+          }
+        ]
+      },
+      include: [{ model: db.Cargo, as: 'Cargo' }],
+      attributes: ['id', 'nome', 'email', 'matricula', 'cargo_id']
+    });
+
+    console.log('Usuários encontrados:', usuarios);
+
+    if (usuarios.length === 0) {
+      return res.status(200).json({ message: 'Nenhum usuário encontrado', usuarios: [] });
+    }
+
+    res.status(200).json({
+      message: 'Usuários recuperados com sucesso',
+      usuarios
+    });
+  } catch (error) {
+    console.error('Erro ao buscar usuários por nome ou cargo:', error);
+    res.status(500).json({ message: 'Erro ao buscar usuários por nome ou cargo' });
+  }
+};
