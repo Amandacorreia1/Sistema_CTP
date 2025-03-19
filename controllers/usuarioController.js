@@ -95,3 +95,39 @@ export const excluirUsuario = async (req, res) => {
     res.status(500).json({ message: 'Erro ao deletar usuário' });
   }
 };
+
+
+export const usuariosPorCargo = async (req, res) => {
+  const { cargo } = req.params;
+
+  if (!cargo) {
+    return res.status(400).json({ message: 'O cargo é obrigatório' });
+  }
+
+  try {
+    const usuarios = await db.Usuario.findAll({
+      include: [{
+        model: db.Cargo,
+        as: 'Cargo',
+        where: {
+          nome: {
+            [db.Sequelize.Op.like]: `%${cargo}%`
+          }
+        },
+        attributes: ['nome']
+      }],
+      attributes: ['nome', 'email', 'matricula', 'cargo_id']
+    });
+    if (usuarios.length === 0) {
+      return res.status(404).json({ message: 'Nenhum usuário encontrado para este cargo' });
+    }
+
+    res.status(200).json({
+      message: 'Usuários recuperados com sucesso',
+      usuarios
+    });
+  } catch (error) {
+    console.error('Erro ao buscar usuários por cargo:', error);
+    res.status(500).json({ message: 'Erro ao buscar usuários por cargo' });
+  }
+};
