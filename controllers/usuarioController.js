@@ -57,7 +57,7 @@ export const buscarUsuarioPorNome = async (req, res) => {
 
 export const editarUsuario = async (req, res) => {
   const { id } = req.params;
-  const { nome, matricula, email, senha, cargoId } = req.body;
+  const { nome, matricula, email, cargoId } = req.body;
 
   try {
     const usuario = await db.Usuario.findByPk(id);
@@ -68,7 +68,6 @@ export const editarUsuario = async (req, res) => {
     usuario.nome = nome;
     usuario.matricula = matricula;
     usuario.email = email;
-    usuario.senha = senha;
     usuario.cargo_id = cargoId;
     await usuario.save();
 
