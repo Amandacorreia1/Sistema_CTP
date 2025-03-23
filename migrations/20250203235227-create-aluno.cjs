@@ -3,9 +3,12 @@ module.exports = {
     
     await queryInterface.createTable('Alunos', {
       matricula: {
-        type: Sequelize.STRING(20),
+        type: Sequelize.STRING(14),
         allowNull: false,
-        primaryKey: true
+        primaryKey: true,
+        validate: {
+          isNumeric: true 
+        }
       },
       nome: {
         type: Sequelize.STRING,

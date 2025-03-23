@@ -11,8 +11,11 @@ export default (sequelize) => {
   }
   Aluno.init({
     matricula: {
-      type: DataTypes.STRING(20),
+      type: DataTypes.STRING(14),
       primaryKey: true,
+      validate: {
+        isNumeric: true
+      }
     },
     nome: {
       type: DataTypes.STRING,
