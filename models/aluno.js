@@ -11,7 +11,7 @@ export default (sequelize) => {
   }
   Aluno.init({
     matricula: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.STRING(20),
       primaryKey: true,
     },
     nome: {

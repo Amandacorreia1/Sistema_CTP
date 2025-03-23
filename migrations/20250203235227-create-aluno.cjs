@@ -3,7 +3,7 @@ module.exports = {
     
     await queryInterface.createTable('Alunos', {
       matricula: {
-        type: Sequelize.INTEGER,
+        type: Sequelize.STRING(20),
         allowNull: false,
         primaryKey: true
       },
