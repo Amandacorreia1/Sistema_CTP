@@ -6,10 +6,10 @@ import https from 'https';
 dotenv.config();
 
 export const cadastrarAluno = async (req, res) => {
-  const { matricula, nome, email, curso } = req.body;
+  const { matricula, nome, email, curso_id } = req.body;
 
   try {
-    if (!matricula || !nome || !email || !curso) {
+    if (!matricula || !nome || !email || !curso_id) {
       return res.status(400).json({ mensagem: 'Todos os campos são obrigatórios' });
     }
 
@@ -18,14 +18,24 @@ export const cadastrarAluno = async (req, res) => {
       return res.status(409).json({ mensagem: 'Já existe um aluno cadastrado com essa matrícula' });
     }
 
+    const cursoExistente = await db.Curso.findByPk(curso_id);
+    if (!cursoExistente) {
+      return res.status(400).json({ mensagem: 'Curso inválido' });
+    }
+
     const novoAluno = await db.Aluno.create({
       matricula,
       nome,
       email,
-      curso
+      curso_id
     });
 
-    res.status(201).json(novoAluno);
+    res.status(201).json({
+      matricula: novoAluno.matricula,
+      nome: novoAluno.nome,
+      email: novoAluno.email,
+      curso_id: novoAluno.curso_id
+    });
   } catch (erro) {
     console.error('Erro ao cadastrar aluno:', {
       message: erro.message,
@@ -36,14 +46,14 @@ export const cadastrarAluno = async (req, res) => {
 };
 
 export const buscarAluno = async (req, res) => {
-  let { matricula } = req.params;
+  const { matricula } = req.params;
 
   try {
     let aluno = await db.Aluno.findOne({ 
-      attributes: ['matricula', 'nome', 'email', 'curso'],
+      attributes: ['matricula', 'nome', 'email', 'curso_id'],
+      include: [{ model: db.Curso, attributes: ['id', 'nome'] }],
       where: { matricula } 
     });
-    console.log('Aluno no banco local:', aluno ? aluno.dataValues : 'Não encontrado');
 
     if (!aluno) {
       const url = 'https://ruapi.cedro.ifce.edu.br/api/student-by-enrollment';
@@ -57,30 +67,41 @@ export const buscarAluno = async (req, res) => {
         })
       };
 
-      console.log('Parâmetros enviados:', config.params);
-
       const response = await axios.get(url, config);
       const alunoRu = response.data;
-      console.log('Resposta completa da API externa:', JSON.stringify(alunoRu, null, 2));
 
       if (!alunoRu || !alunoRu.mat) {
-        console.log('API externa retornou vazio ou inválido');
         return res.status(404).json({ mensagem: 'Aluno não encontrado na API externa' });
+      }
+
+      const nomeCurso = alunoRu.course ? alunoRu.course.description || '' : '';
+      let curso = await db.Curso.findOne({ where: { nome: nomeCurso } });
+
+      if (!curso && nomeCurso) {
+        curso = await db.Curso.create({ nome: nomeCurso });
       }
 
       const alunoData = {
         matricula: alunoRu.mat || matricula,
         nome: alunoRu.name || '',
         email: alunoRu.user && alunoRu.user[0] ? alunoRu.user[0].email || '' : `${matricula}@example.com`,
-        curso: alunoRu.course ? alunoRu.course.description || '' : ''
+        curso_id: curso ? curso.id : null
       };
-      console.log('Dados mapeados antes de criar:', alunoData);
+
+      if (!alunoData.curso_id) {
+        return res.status(400).json({ mensagem: 'Curso não pode ser nulo' });
+      }
 
       aluno = await db.Aluno.create(alunoData);
-      console.log('Aluno criado:', aluno.dataValues);
     }
 
-    res.status(200).json(aluno);
+    res.status(200).json({
+      matricula: aluno.matricula,
+      nome: aluno.nome,
+      email: aluno.email,
+      curso_id: aluno.curso_id,
+      curso: aluno.Curso ? aluno.Curso.nome : null
+    });
   } catch (erro) {
     console.error('Erro ao buscar aluno:', {
       message: erro.message,
@@ -94,15 +115,23 @@ export const buscarAluno = async (req, res) => {
 export const listarAlunos = async (req, res) => {
   try {
     const alunos = await db.Aluno.findAll({ 
-      attributes: ['matricula', 'nome', 'email', 'curso'],
+      attributes: ['matricula', 'nome', 'email', 'curso_id'],
+      include: [{ model: db.Curso, attributes: ['id', 'nome'] }],
       where: {
         nome: { [db.Sequelize.Op.ne]: '' }, 
-        email: { [db.Sequelize.Op.ne]: '' }, 
-        curso: { [db.Sequelize.Op.ne]: '' }  
+        email: { [db.Sequelize.Op.ne]: '' }
       }
     });
 
-    res.status(200).json(alunos);
+    const alunosFormatados = alunos.map(aluno => ({
+      matricula: aluno.matricula,
+      nome: aluno.nome,
+      email: aluno.email,
+      curso_id: aluno.curso_id,
+      curso: aluno.Curso ? aluno.Curso.nome : null
+    }));
+
+    res.status(200).json(alunosFormatados);
   } catch (erro) {
     console.error(erro);
     res.status(500).json({ mensagem: 'Erro ao buscar alunos' });

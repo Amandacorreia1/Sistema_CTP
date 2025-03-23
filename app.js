@@ -11,6 +11,7 @@ import alunoRoutes from './routes/alunoRoutes.js';
 import intervencaoDemandaRoutes from './routes/intervencaoDemandaRoutes.js';
 import demandaAlunoRoutes from './routes/demandaalunoRoutes.js';
 import cargoRoutes from './routes/cargoRoutes.js';
+import cursoRoutes from './routes/cursoRoutes.js';
 import cors from 'cors';
 
 const app = express();
@@ -33,6 +34,6 @@ app.use('/api', usuarioRoutes);
 app.use('/api', alunoRoutes);
 app.use('/api', intervencaoDemandaRoutes);
 app.use('/api', demandaAlunoRoutes);
-app.use('/api',cargoRoutes);
-
+app.use('/api', cargoRoutes);
+app.use('/api', cursoRoutes);
 export default app;

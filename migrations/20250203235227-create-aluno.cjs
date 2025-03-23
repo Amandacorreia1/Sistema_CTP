@@ -19,9 +19,13 @@ module.exports = {
         allowNull: false,
         unique: true
       },
-      curso: {
-        type: Sequelize.STRING,
-        allowNull: false
+      curso_id: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        references: {
+          model: 'Cursos',
+          key: 'id'
+        }
       },
       createdAt: {
         type: Sequelize.DATE,

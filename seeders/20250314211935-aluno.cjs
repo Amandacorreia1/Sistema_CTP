@@ -6,10 +6,10 @@ module.exports = {
     const now = new Date();
 
     await queryInterface.bulkInsert('Alunos', [
-      { matricula: 123456, nome: 'Amanda Correia', email: 'amanda.c@email.com', curso: 'Engenharia Mecânica', createdAt: now, updatedAt: now },
-      { matricula: 123457, nome: 'André Casimiro', email: 'andrec@email.com', curso: 'Engenharia Elétrica', createdAt: now, updatedAt: now },
-      { matricula: 123458, nome: 'Daniel Teixeira', email: 'daniel34@email.com', curso: 'Mecatrônica Industrial', createdAt: now, updatedAt: now },
-      { matricula: 123459, nome: 'Danielly Benicio', email: 'daniellybenicio@email.com', curso: 'Sistemas de Informação', createdAt: now, updatedAt: now }
+      { matricula: 123456, nome: 'Amanda Correia', email: 'amanda.c@email.com', curso_id: 1, createdAt: now, updatedAt: now },
+      { matricula: 123457, nome: 'André Casimiro', email: 'andrec@email.com', curso_id: 2, createdAt: now, updatedAt: now },
+      { matricula: 123458, nome: 'Daniel Teixeira', email: 'daniel34@email.com', curso_id: 3, createdAt: now, updatedAt: now },
+      { matricula: 123459, nome: 'Danielly Benicio', email: 'daniellybenicio@email.com', curso_id: 4, createdAt: now, updatedAt: now }
     ]);
   },
 

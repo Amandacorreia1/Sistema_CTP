@@ -1,12 +1,13 @@
 'use strict';
-import { Model}  from 'sequelize';
+import { Model } from 'sequelize';
 import { DataTypes } from 'sequelize';
 
 export default (sequelize) => {
   class Aluno extends Model {
     static associate(models) {
       Aluno.belongsToMany(models.Condicao, { through: 'CondicaoAluno', foreignKey: 'matricula', otherKey: 'condicao_id' });
-      Aluno.hasMany(models.DemandaAluno, { foreignKey: 'aluno_id'});
+      Aluno.hasMany(models.DemandaAluno, { foreignKey: 'aluno_id' });
+      Aluno.belongsTo(models.Curso, { foreignKey: 'curso_id'});
     }
   }
   Aluno.init({
@@ -25,14 +26,18 @@ export default (sequelize) => {
       type: DataTypes.STRING,
       allowNull: false
     },
-    curso: {
-      type: DataTypes.STRING,
-      allowNull: false
-    }
-  },
-    {
-      sequelize,
-      modelName: 'Aluno',
-    });
+    curso_id: { 
+      type: DataTypes.INTEGER, 
+      allowNull: false,
+      references: {
+        model: 'Cursos',
+        key: 'id'
+      }
+    } 
+  }, { 
+    sequelize,
+    modelName: 'Aluno'
+  });
+
   return Aluno;
 };
