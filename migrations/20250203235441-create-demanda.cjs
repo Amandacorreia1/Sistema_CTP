@@ -16,9 +16,8 @@ module.exports = {
         allowNull: false,
         defaultValue: true
       },
-      nivel: {
-        type: Sequelize.ENUM('Privado', 'Publico'),
-        allowNull: false,
+      disciplina: {
+        type: Sequelize.STRING
       },
       usuario_id: {
         type: Sequelize.INTEGER,

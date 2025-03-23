@@ -26,10 +26,9 @@ export default (sequelize) => {
       allowNull: false,
       defaultValue: true
     },
-    nivel: {
-      type: DataTypes.ENUM,
-      values: ['Privado', 'Público'],
-      allowNull: false
+    disciplina: {
+      type: DataTypes.STRING,
+      allowNull: true
     },
     usuario_id: {
       type: DataTypes.INTEGER,
