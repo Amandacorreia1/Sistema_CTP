@@ -46,19 +46,22 @@ export const buscarAluno = async (req, res) => {
     console.log('Aluno no banco local:', aluno ? aluno.dataValues : 'Não encontrado');
 
     if (!aluno) {
-      const response = await axios.get('https://ruapi.cedro.ifce.edu.br/api/student-by-enrollment', {
+      const url = 'https://ruapi.cedro.ifce.edu.br/api/student-by-enrollment';
+      const config = {
         params: { 
-          enrollment: matricula,
+          enrollment: matricula, 
           token: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
         },
         httpsAgent: new https.Agent({
-          rejectUnauthorized: false 
-          //ver com Pedro se tem outra forma alem de rejeitar o certificado
+          rejectUnauthorized: false
         })
-      });
+      };
 
+      console.log('Parâmetros enviados:', config.params);
+
+      const response = await axios.get(url, config);
       const alunoRu = response.data;
-      console.log('Resposta da API externa:', alunoRu);
+      console.log('Resposta completa da API externa:', JSON.stringify(alunoRu, null, 2));
 
       if (!alunoRu || !alunoRu.mat) {
         console.log('API externa retornou vazio ou inválido');
