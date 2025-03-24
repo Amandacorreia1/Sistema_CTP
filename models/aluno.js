@@ -5,9 +5,9 @@ import { DataTypes } from 'sequelize';
 export default (sequelize) => {
   class Aluno extends Model {
     static associate(models) {
-      Aluno.belongsToMany(models.Condicao, { through: 'CondicaoAluno', foreignKey: 'matricula', otherKey: 'condicao_id' });
+      Aluno.belongsToMany(models.Condicao, { through: 'condicaoalunos', foreignKey: 'aluno_id', otherKey: 'condicao_id' });
       Aluno.hasMany(models.DemandaAluno, { foreignKey: 'aluno_id' });
-      Aluno.belongsTo(models.Curso, { foreignKey: 'curso_id'});
+      Aluno.belongsTo(models.Curso, { foreignKey: 'curso_id', as:'Curso'});
     }
   }
   Aluno.init({
