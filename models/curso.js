@@ -5,7 +5,7 @@ import { DataTypes } from 'sequelize';
 export default (sequelize) => {
   class Curso extends Model {
     static associate(models) {
-      Curso.hasMany(models.Aluno, {foreignKey: 'curso_id'});
+      Curso.hasMany(models.Aluno, { foreignKey: 'curso_id', as: 'Cursos' });
     }
   }
 

@@ -1,5 +1,5 @@
 'use strict';
-import { Model}  from 'sequelize';
+import { Model } from 'sequelize';
 import { DataTypes } from 'sequelize';
 
 export default (sequelize) => {
@@ -24,10 +24,6 @@ export default (sequelize) => {
       type: DataTypes.INTEGER,
       allowNull: false,
       references: { model: 'Alunos', key: 'matricula' }
-    },
-    disciplina: {
-      type: DataTypes.STRING,
-      allowNull: true
     },
   }, {
 

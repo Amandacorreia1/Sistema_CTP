@@ -7,8 +7,8 @@ dotenv.config();
 
 export const adicionarCondicao = async (req, res) => {
   try {
-    const { id_condicao } = req.body; 
-    const { id } = req.params; 
+    const { id_condicao } = req.body;
+    const { id } = req.params;
 
     const aluno = await db.Aluno.findOne({ where: { matricula: id } });
     if (!aluno) {
@@ -60,11 +60,11 @@ export const adicionarCondicao = async (req, res) => {
 };
 
 export const cadastrarAluno = async (req, res) => {
-  const { matricula, nome, email, curso_id } = req.body;
+  const { matricula, nome, email, curso, condicoes } = req.body;
 
   try {
-    if (!matricula || !nome || !email || !curso_id) {
-      return res.status(400).json({ mensagem: 'Todos os campos são obrigatórios' });
+    if (!matricula || !nome || !email || !curso || !condicoes || !Array.isArray(condicoes) || condicoes.length === 0) {
+      return res.status(400).json({ mensagem: 'Matrícula, nome, email, curso e pelo menos uma condição são obrigatórios' });
     }
 
     const alunoExistente = await db.Aluno.findOne({ where: { matricula } });
@@ -72,101 +72,129 @@ export const cadastrarAluno = async (req, res) => {
       return res.status(409).json({ mensagem: 'Já existe um aluno cadastrado com essa matrícula' });
     }
 
-    const cursoExistente = await db.Curso.findByPk(curso_id);
+    let cursoExistente = await db.Curso.findOne({ where: { nome: curso } });
     if (!cursoExistente) {
-      return res.status(400).json({ mensagem: 'Curso inválido' });
+      cursoExistente = await db.Curso.create({ nome: curso });
     }
 
     const novoAluno = await db.Aluno.create({
       matricula,
       nome,
       email,
-      curso_id
+      curso_id: cursoExistente.id,
+    });
+
+    const condicaoIds = [];
+    for (const condicao of condicoes) {
+      let condicaoRecord;
+      if (typeof condicao === 'object' && condicao.id && condicao.nome) {
+        condicaoRecord = await db.Condicao.findOne({ where: { id: condicao.id } });
+        if (!condicaoRecord) {
+          condicaoRecord = await db.Condicao.create({ nome: condicao.nome });
+        }
+      } else if (typeof condicao === 'string') {
+        condicaoRecord = await db.Condicao.findOne({ where: { nome: condicao } });
+        if (!condicaoRecord) {
+          condicaoRecord = await db.Condicao.create({ nome: condicao });
+        }
+      } else if (typeof condicao === 'number') {
+        condicaoRecord = await db.Condicao.findOne({ where: { id: condicao } });
+        if (!condicaoRecord) {
+          return res.status(400).json({ mensagem: `Condição com ID ${condicao} não encontrada` });
+        }
+      } else {
+        return res.status(400).json({ mensagem: 'Formato de condição inválido' });
+      }
+      condicaoIds.push(condicaoRecord.id);
+    }
+
+    await novoAluno.addCondicaos(condicaoIds);
+
+    const condicaoRecords = await db.Condicao.findAll({
+      where: { id: condicaoIds },
+      attributes: ['id', 'nome'],
     });
 
     res.status(201).json({
       matricula: novoAluno.matricula,
       nome: novoAluno.nome,
       email: novoAluno.email,
-      curso_id: novoAluno.curso_id
+      curso: cursoExistente.nome,
+      condicoes: condicaoRecords.map((c) => ({ id: c.id, nome: c.nome })),
     });
   } catch (erro) {
     console.error('Erro ao cadastrar aluno:', {
       message: erro.message,
-      stack: erro.stack
+      stack: erro.stack,
     });
     res.status(500).json({ mensagem: 'Erro ao cadastrar aluno', erro: erro.message });
   }
 };
 
+
 export const buscarAluno = async (req, res) => {
   const { matricula } = req.params;
 
   try {
+    console.log(`Buscando aluno localmente: ${matricula}`);
     let aluno = await db.Aluno.findOne({
       attributes: ['matricula', 'nome', 'email', 'curso_id'],
-      include: [{ model: db.Curso, as:'Cursos' }],
-      include: [{model:db.Condicao, attributes: ['id', 'nome']}],
-      where: { matricula }
+      include: [
+        { model: db.Curso, as: 'Cursos' },
+        { model: db.Condicao, as: 'Condicaos', attributes: ['id', 'nome'] },
+      ],
+      where: { matricula },
     });
 
-    const curso = await db.Curso.findByPk(aluno.curso_id);
-
     if (!aluno) {
+      console.log(`Aluno não encontrado localmente, consultando API externa: ${matricula}`);
       const url = 'https://ruapi.cedro.ifce.edu.br/api/student-by-enrollment';
       const config = {
-        params: {
-          enrollment: matricula,
-          token: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
-        },
-        httpsAgent: new https.Agent({
-          rejectUnauthorized: false
-        })
+        params: { enrollment: matricula, token: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789' },
+        httpsAgent: new https.Agent({ rejectUnauthorized: false }),
       };
 
       const response = await axios.get(url, config);
       const alunoRu = response.data;
+      console.log('Resposta da API externa:', alunoRu);
 
       if (!alunoRu || !alunoRu.mat) {
         return res.status(404).json({ mensagem: 'Aluno não encontrado na API externa' });
       }
 
-      const nomeCurso = alunoRu.course ? alunoRu.course.description || '' : '';
+      const nomeCurso = alunoRu.course?.description || 'Curso Desconhecido';
       let curso = await db.Curso.findOne({ where: { nome: nomeCurso } });
-
       if (!curso && nomeCurso) {
+        console.log(`Criando curso: ${nomeCurso}`);
         curso = await db.Curso.create({ nome: nomeCurso });
       }
-      
+
       const alunoData = {
         matricula: alunoRu.mat || matricula,
-        nome: alunoRu.name || '',
-        email: alunoRu.user && alunoRu.user[0] ? alunoRu.user[0].email || '' : `${matricula}@example.com`,
-        curso_id: curso ? curso.id : null,       
+        nome: alunoRu.name || 'Nome Desconhecido',
+        email: alunoRu.user?.[0]?.email || `${matricula}@example.com`,
+        curso: curso?.nome || null,
+        condicoes: [],
       };
 
-      if (!alunoData.curso_id) {
-        return res.status(400).json({ mensagem: 'Curso não pode ser nulo' });
-      }
-
-      aluno = await db.Aluno.create(alunoData);
+      return res.status(200).json(alunoData);
     }
 
+    const curso = await db.Curso.findByPk(aluno.curso_id);
     res.status(200).json({
       matricula: aluno.matricula,
       nome: aluno.nome,
       email: aluno.email,
-      curso_id: aluno.curso_id,
-      curso: curso,
-      condicoes:aluno.Condicaos
+      curso: curso?.nome || null,
+      condicoes: aluno.Condicaos || [],
     });
   } catch (erro) {
     console.error('Erro ao buscar aluno:', {
       message: erro.message,
       stack: erro.stack,
-      response: erro.response ? erro.response.data : null
+      matricula,
     });
-    res.status(500).json({ mensagem: 'Erro ao obter aluno', erro: erro.message });
+    res.status(500).json({ mensagem: 'Erro interno ao buscar aluno', erro: erro.message });
   }
 };
 
@@ -175,29 +203,30 @@ export const listarAlunos = async (req, res) => {
     const alunos = await db.Aluno.findAll({
       attributes: ['matricula', 'nome', 'email', 'curso_id'],
       include: [
-        { model: db.Curso, as: 'Curso' }, 
-        { model: db.Condicao, through: 'condicaoalunos' } 
+        { model: db.Curso, as: 'Cursos' },
+        { model: db.Condicao, as: 'Condicaos', through: { attributes: [] } }
       ],
       where: {
         nome: { [db.Sequelize.Op.ne]: '' },
         email: { [db.Sequelize.Op.ne]: '' }
       }
     });
-  
 
     const alunosFormatados = alunos.map(aluno => ({
       matricula: aluno.matricula,
       nome: aluno.nome,
       email: aluno.email,
       curso_id: aluno.curso_id,
-      curso: aluno.Curso ? aluno.Curso.nome : null,
-      condicoes: aluno.Condicaos ?  aluno.Condicaos.map(condicao => ([condicao.nome]
-      )): []
+      curso: aluno.Cursos ? aluno.Cursos.nome : null,
+      condicoes: aluno.Condicaos ? aluno.Condicaos.map(condicao => condicao.nome) : []
     }));
 
     res.status(200).json(alunosFormatados);
   } catch (erro) {
-    console.error(erro);
-    res.status(500).json({ mensagem: 'Erro ao buscar alunos' });
+    console.error('Erro ao listar alunos:', {
+      message: erro.message,
+      stack: erro.stack
+    });
+    res.status(500).json({ mensagem: 'Erro ao buscar alunos', erro: erro.message });
   }
 };

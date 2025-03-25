@@ -5,9 +5,14 @@ import { DataTypes } from 'sequelize';
 export default (sequelize) => {
   class Aluno extends Model {
     static associate(models) {
-      Aluno.belongsToMany(models.Condicao, { through: 'condicaoalunos', foreignKey: 'aluno_id', otherKey: 'condicao_id' });
+      Aluno.belongsToMany(models.Condicao, {
+        through: 'CondicaoAlunos',
+        foreignKey: 'aluno_id',
+        otherKey: 'condicao_id',
+        as: 'Condicaos'
+      });
       Aluno.hasMany(models.DemandaAluno, { foreignKey: 'aluno_id' });
-      Aluno.belongsTo(models.Curso, { foreignKey: 'curso_id', as:'Curso'});
+      Aluno.belongsTo(models.Curso, { foreignKey: 'curso_id', as: 'Cursos' });
     }
   }
   Aluno.init({
@@ -26,15 +31,15 @@ export default (sequelize) => {
       type: DataTypes.STRING,
       allowNull: false
     },
-    curso_id: { 
-      type: DataTypes.INTEGER, 
+    curso_id: {
+      type: DataTypes.INTEGER,
       allowNull: false,
       references: {
         model: 'Cursos',
         key: 'id'
       }
-    } 
-  }, { 
+    }
+  }, {
     sequelize,
     modelName: 'Aluno'
   });

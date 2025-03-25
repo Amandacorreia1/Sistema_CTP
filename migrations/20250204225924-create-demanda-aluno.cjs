@@ -27,9 +27,6 @@ module.exports = {
         onDelete: 'CASCADE',
         onUpdate: 'CASCADE'
       },
-      disciplina: {
-        type: Sequelize.STRING
-      },
       createdAt: {
         type: Sequelize.DATE,
         allowNull: false
