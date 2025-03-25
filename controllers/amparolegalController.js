@@ -3,7 +3,7 @@ import db from '../models/index.js';
 export const listarAmparoLegal = async (req, res) => {
     try {
       const amparosLegais = await db.AmparoLegal.findAll({
-        attributes: ['nome'],
+        attributes: ['id', 'nome'],
         order: [['nome', 'ASC']], 
       });
       const indexOutra = amparosLegais.findIndex(amparo => amparo.nome === 'Outra');
