@@ -65,4 +65,40 @@ export const removeAmparoLegal = async (req, res) => {
     console.error(erro);
     return res.status(500).json({ mensagem: 'Erro ao remover amparo legal.' });  
   }
+}
+export const listarAmparosPorDemanda = async (req, res) => {
+    const { demandaId } = req.params; 
+  
+    try {
+      if (!demandaId) {
+        return res.status(400).json({ mensagem: 'O ID da demanda é obrigatório.' });
+      }
+  
+      const amparosDemandas = await db.AmparoDemanda.findAll({
+        where: { demanda_id: demandaId },
+        include: [
+          {
+            model: db.AmparoLegal,
+            as: 'AmparoLegal', 
+            attributes: ['id', 'nome'],
+          },
+        ],
+        attributes: ['id', 'demanda_id', 'amparoLegal_id'], 
+      });
+  
+      if (!amparosDemandas || amparosDemandas.length === 0) {
+        return res.status(200).json([]); 
+      }
+  
+      const amparosLegais = amparosDemandas.map((ad) => ({
+        id: ad.AmparoLegal.id,
+        nome: ad.AmparoLegal.nome,
+      }));
+  
+      return res.status(200).json(amparosLegais);
+    } catch (erro) {
+      console.error(erro);
+      return res.status(500).json({ mensagem: 'Erro ao buscar amparos legais da demanda.' });
+    }
+  
 };
