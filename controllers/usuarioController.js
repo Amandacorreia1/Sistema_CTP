@@ -4,7 +4,7 @@ export const buscarTodosUsuarios = async (req, res) => {
   try {
     const usuarios = await db.Usuario.findAll({
       attributes: ['id', 'nome', 'email', 'matricula', 'cargo_id'],
-      include: [{ model: db.Cargo, as: 'Cargo' }], 
+      include: [{ model: db.Cargo, as: 'Cargo' }],
     });
     res.status(200).json({ message: 'Usuários recuperados com sucesso', usuarios });
   } catch (error) {
@@ -19,7 +19,7 @@ export const buscarUsuariosPorId = async (req, res) => {
   try {
     const usuario = await db.Usuario.findByPk(id, {
       attributes: ['id', 'nome', 'email', 'matricula', 'cargo_id'],
-      include: [{ model: db.Cargo, as: 'Cargo' }], 
+      include: [{ model: db.Cargo, as: 'Cargo' }],
     });
     if (!usuario) {
       return res.status(404).json({ message: 'Usuário não encontrado' });
@@ -32,7 +32,7 @@ export const buscarUsuariosPorId = async (req, res) => {
 };
 
 export const buscarUsuarioPorNome = async (req, res) => {
-  const { nome } = req.params; 
+  const { nome } = req.params;
 
   if (!nome) {
     return res.status(400).json({ message: 'O nome é obrigatório' });
@@ -134,7 +134,7 @@ export const usuariosPorCargo = async (req, res) => {
 export const UsuariosPorNomeOuCargo = async (req, res) => {
   const { termo } = req.params;
 
-  console.log('Buscando por termo:', termo); 
+  console.log('Buscando por termo:', termo);
 
   if (!termo) {
     return res.status(400).json({ message: 'O termo de busca é obrigatório' });
@@ -171,5 +171,35 @@ export const UsuariosPorNomeOuCargo = async (req, res) => {
   } catch (error) {
     console.error('Erro ao buscar usuários por nome ou cargo:', error);
     res.status(500).json({ message: 'Erro ao buscar usuários por nome ou cargo' });
+  }
+};
+
+export const usuariosEncaminhamento = async (req, res) => {
+  const usuarioLogadoId = req.usuario.id;
+
+  try {
+    const usuarios = await db.Usuario.findAll({
+      where: {
+        id: { [db.Sequelize.Op.ne]: usuarioLogadoId },
+      },
+      attributes: ['id', 'nome', 'email', 'matricula', 'cargo_id'],
+      include: [{
+        model: db.Cargo,
+        as: 'Cargo',
+        where: {
+          nome: { [db.Sequelize.Op.ne]: 'Admin' },
+        },
+        required: true,
+      }],
+    });
+
+    if (usuarios.length === 0) {
+      return res.status(200).json({ message: 'Nenhum usuário elegível encontrado', usuarios: [] });
+    }
+
+    res.status(200).json({ message: 'Usuários recuperados com sucesso', usuarios });
+  } catch (error) {
+    console.error('Erro ao listar usuários:', error);
+    res.status(500).json({ message: 'Erro ao listar usuários' });
   }
 };

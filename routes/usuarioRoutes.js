@@ -1,5 +1,5 @@
 import express from 'express';
-import { buscarTodosUsuarios, buscarUsuariosPorId, buscarUsuarioPorNome, editarUsuario, excluirUsuario, usuariosPorCargo, UsuariosPorNomeOuCargo } from '../controllers/usuarioController.js';
+import { buscarTodosUsuarios, buscarUsuariosPorId, buscarUsuarioPorNome, editarUsuario, excluirUsuario, usuariosPorCargo, UsuariosPorNomeOuCargo, usuariosEncaminhamento } from '../controllers/usuarioController.js';
 import { autenticarToken, authorizeRole } from '../middlewares/authMiddlware.js';
 
 const router = express.Router();
@@ -11,6 +11,7 @@ router.get('/usuario/:id', autenticarToken, authorizeRole('Admin'), buscarUsuari
 router.put('/usuario/:id', autenticarToken, authorizeRole('Admin'), editarUsuario);
 router.delete('/usuario/:id', autenticarToken, authorizeRole('Admin'), excluirUsuario);
 router.get('/usuarios/busca/:termo', autenticarToken, authorizeRole('Admin'), UsuariosPorNomeOuCargo);
+router.get('/usuarios-encaminhamento', autenticarToken, usuariosEncaminhamento);
 
 export default router;
 

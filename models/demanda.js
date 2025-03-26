@@ -5,16 +5,20 @@ import { DataTypes } from "sequelize";
 export default (sequelize) => {
   class Demanda extends Model {
     static associate(models) {
-      Demanda.belongsTo(models.Usuario, { foreignKey: "usuario_id" });
+      Demanda.belongsTo(models.Usuario, { foreignKey: "usuario_id", as: "Usuario" });
       Demanda.belongsToMany(models.AmparoLegal, {
         through: "AmparoDemandas",
         foreignKey: "demanda_id",
         otherKey: "amparolegal_id",
       });
-      Demanda.hasMany(models.DemandaAluno, { foreignKey: "demanda_id" });
+      Demanda.hasMany(models.DemandaAluno, { foreignKey: 'demanda_id', as: 'DemandaAlunos' });
       Demanda.hasMany(models.IntervencaoDemanda, {
         foreignKey: "demanda_id",
         as: "IntervencoesDemandas",
+      });
+      Demanda.hasMany(models.Encaminhamentos, {
+        foreignKey: "demanda_id",
+        as: "Encaminhamentos",
       });
     }
   }

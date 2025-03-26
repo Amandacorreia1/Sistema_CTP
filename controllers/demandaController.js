@@ -120,40 +120,80 @@ export const listarDemandasUsuario = async (req, res) => {
 
     const usuario = await db.Usuario.findByPk(usuario_id, {
       attributes: ["id", "nome", "email", "matricula", "cargo_id"],
-      include: [{ model: db.Cargo, as: "Cargo" }],
+      include: [{ model: db.Cargo, as: "Cargo", attributes: ["id", "nome"] }],
     });
+
+    if (!usuario) {
+      return res.status(404).json({ mensagem: "Usuário não encontrado" });
+    }
 
     let demandas;
     if (
-      usuario.cargo_id === 4 ||
-      usuario.cargo_id === 3 ||
-      usuario.cargo_id === 2
+      usuario.Cargo.nome === "Funcionario CTP" ||
+      usuario.Cargo.nome === "Diretor Geral" ||
+      usuario.Cargo.nome === "Diretor Ensino"
     ) {
       demandas = await db.Demanda.findAll({
         include: [
           {
             model: db.Usuario,
-            attributes: ["nome", "email"],
+            attributes: ["id", "nome", "email"],
+            as: "Usuario",
+            include: [{ model: db.Cargo, as: "Cargo", attributes: ["nome"] }],
           },
           {
             model: db.AmparoLegal,
             through: { attributes: [] },
             attributes: ["id", "nome"],
+          },
+          {
+            model: db.DemandaAluno,
+            as: "DemandaAlunos",
+            include: [
+              {
+                model: db.Aluno,
+                as: "Aluno",
+                attributes: ["nome"],
+              },
+            ],
           },
         ],
       });
     } else {
       demandas = await db.Demanda.findAll({
-        where: { usuario_id: usuario_id },
+        where: {
+          [db.Sequelize.Op.or]: [
+            { usuario_id: usuario_id },
+            { "$Encaminhamentos.destinatario_id$": usuario_id },
+          ],
+        },
         include: [
           {
             model: db.Usuario,
-            attributes: ["nome", "email"],
+            attributes: ["id", "nome", "email"],
+            as: "Usuario",
+            include: [{ model: db.Cargo, as: "Cargo", attributes: ["nome"] }],
           },
           {
             model: db.AmparoLegal,
             through: { attributes: [] },
             attributes: ["id", "nome"],
+          },
+          {
+            model: db.Encaminhamentos,
+            as: "Encaminhamentos",
+            attributes: [],
+          },
+          {
+            model: db.DemandaAluno,
+            as: "DemandaAlunos",
+            include: [
+              {
+                model: db.Aluno,
+                as: "Aluno",
+                attributes: ["nome"],
+              },
+            ],
           },
         ],
       });
@@ -167,7 +207,10 @@ export const listarDemandasUsuario = async (req, res) => {
 
     return res.status(200).json({ demandas });
   } catch (erro) {
-    console.error("Erro ao listar demandas do usuário:", erro);
+    console.error("Erro detalhado ao listar demandas do usuário:", {
+      message: erro.message,
+      stack: erro.stack,
+    });
     return res
       .status(500)
       .json({ mensagem: "Erro ao listar demandas do usuário" });
