@@ -53,11 +53,9 @@ export const criarDemanda = async (req, res) => {
           amparoExistente ? "Encontrado" : "Não encontrado"
         );
         if (!amparoExistente) {
-          return res
-            .status(404)
-            .json({
-              mensagem: `Amparo legal com ID ${amparoId} não encontrado.`,
-            });
+          return res.status(404).json({
+            mensagem: `Amparo legal com ID ${amparoId} não encontrado.`,
+          });
         }
       }
       const amparoDemandaData = amparoLegal.map((amparoId) => ({
@@ -157,6 +155,18 @@ export const listarDemandasUsuario = async (req, res) => {
               },
             ],
           },
+          {
+            model: db.Encaminhamentos,
+            as: "Encaminhamentos",
+            attributes: ["id", "descricao", "data"],
+            include: [
+              {
+                model: db.Usuario,
+                as: "Destinatario",
+                attributes: ["id", "nome"],
+              },
+            ],
+          },
         ],
       });
     } else {
@@ -180,11 +190,6 @@ export const listarDemandasUsuario = async (req, res) => {
             attributes: ["id", "nome"],
           },
           {
-            model: db.Encaminhamentos,
-            as: "Encaminhamentos",
-            attributes: [],
-          },
-          {
             model: db.DemandaAluno,
             as: "DemandaAlunos",
             include: [
@@ -192,6 +197,18 @@ export const listarDemandasUsuario = async (req, res) => {
                 model: db.Aluno,
                 as: "Aluno",
                 attributes: ["nome"],
+              },
+            ],
+          },
+          {
+            model: db.Encaminhamentos,
+            as: "Encaminhamentos",
+            attributes: ["id", "descricao", "data"],
+            include: [
+              {
+                model: db.Usuario,
+                as: "Destinatario",
+                attributes: ["id", "nome"],
               },
             ],
           },
@@ -205,7 +222,15 @@ export const listarDemandasUsuario = async (req, res) => {
         .json({ mensagem: "Nenhuma demanda encontrada para este usuário" });
     }
 
-    return res.status(200).json({ demandas });
+    const demandasFormatadas = demandas.map((demanda) => ({
+      ...demanda.toJSON(),
+      destinatarios: demanda.Encaminhamentos.map((enc) => ({
+        id: enc.Destinatario.id,
+        nome: enc.Destinatario.nome,
+      })),
+    }));
+
+    return res.status(200).json({ demandas: demandasFormatadas });
   } catch (erro) {
     console.error("Erro detalhado ao listar demandas do usuário:", {
       message: erro.message,
