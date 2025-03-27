@@ -131,6 +131,77 @@ export const cadastrarAluno = async (req, res) => {
   }
 };
 
+export const atualizarAluno = async (req, res) => {
+  const matricula = req.params.matricula;
+  const { nome, email, curso, condicoes } = req.body;
+
+  try {
+    if (!nome || !email || !curso || !condicoes || !Array.isArray(condicoes) || condicoes.length === 0) {
+      return res.status(400).json({ mensagem: 'Nome, email, curso e pelo menos uma condição são obrigatórios' });
+    }
+
+    const alunoExistente = await db.Aluno.findOne({ where: { matricula } });
+    if (!alunoExistente) {
+      return res.status(404).json({ mensagem: 'Aluno não encontrado' });
+    }
+
+    let cursoExistente = await db.Curso.findOne({ where: { nome: curso } });
+    if (!cursoExistente) {
+      cursoExistente = await db.Curso.create({ nome: curso });
+    }
+
+    await alunoExistente.update({
+      nome,
+      email,
+      curso_id: cursoExistente.id,
+    });
+
+    const condicaoIds = [];
+    for (const condicao of condicoes) {
+      let condicaoRecord;
+      if (typeof condicao === 'object' && condicao.id && condicao.nome) {
+        condicaoRecord = await db.Condicao.findOne({ where: { id: condicao.id } });
+        if (!condicaoRecord) {
+          condicaoRecord = await db.Condicao.create({ nome: condicao.nome });
+        }
+      } else if (typeof condicao === 'string') {
+        condicaoRecord = await db.Condicao.findOne({ where: { nome: condicao } });
+        if (!condicaoRecord) {
+          condicaoRecord = await db.Condicao.create({ nome: condicao });
+        }
+      } else if (typeof condicao === 'number') {
+        condicaoRecord = await db.Condicao.findOne({ where: { id: condicao } });
+        if (!condicaoRecord) {
+          return res.status(400).json({ mensagem: `Condição com ID ${condicao} não encontrada` });
+        }
+      } else {
+        return res.status(400).json({ mensagem: 'Formato de condição inválido' });
+      }
+      condicaoIds.push(condicaoRecord.id);
+    }
+
+    await alunoExistente.setCondicaos(condicaoIds);
+
+    const condicaoRecords = await db.Condicao.findAll({
+      where: { id: condicaoIds },
+      attributes: ['id', 'nome'],
+    });
+
+    res.status(200).json({
+      matricula: alunoExistente.matricula,
+      nome: alunoExistente.nome,
+      email: alunoExistente.email,
+      curso: cursoExistente.nome,
+      condicoes: condicaoRecords.map((c) => ({ id: c.id, nome: c.nome })),
+    });
+  } catch (erro) {
+    console.error('Erro ao atualizar aluno:', {
+      message: erro.message,
+      stack: erro.stack,
+    });
+    res.status(500).json({ mensagem: 'Erro ao atualizar aluno', erro: erro.message });
+  }
+};
 
 export const buscarAluno = async (req, res) => {
   const { matricula } = req.params;
