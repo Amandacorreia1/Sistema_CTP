@@ -68,7 +68,7 @@ export const login = async (req, res) => {
                 model: db.Cargo,
                 as: 'Cargo',
                 attributes: ['nome']
-            }] 
+            }]
         });
 
         if (!usuarioExistente) {
@@ -76,18 +76,23 @@ export const login = async (req, res) => {
         }
 
         const senhaValida = await bcrypt.compare(senha, usuarioExistente.senha);
-
         if (!senhaValida) {
             return res.status(401).json({ message: 'Senha inválida.' });
         }
 
-        const token = jwt.sign({ id: usuarioExistente.id, cargo:usuarioExistente.Cargo.nome },
-            process.env.JWT_SECRET, { expiresIn: '1h' }
+        const token = jwt.sign(
+            {
+                id: usuarioExistente.id,
+                nome: usuarioExistente.nome,
+                cargo: usuarioExistente.Cargo.nome
+            },
+            process.env.JWT_SECRET,
+            { expiresIn: "1h" }
         );
 
         res.status(200).json({ message: 'Login bem-sucedido.', token });
-
     } catch (error) {
+        console.error("Erro ao fazer login:", error);
         res.status(500).json({ message: 'Erro ao fazer login.' });
     }
 };
