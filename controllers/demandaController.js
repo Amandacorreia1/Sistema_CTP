@@ -241,3 +241,101 @@ export const listarDemandasUsuario = async (req, res) => {
       .json({ mensagem: "Erro ao listar demandas do usuário" });
   }
 };
+
+export const listarDemandaPorId = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const demanda = await db.Demanda.findOne({
+      where: { id },
+      include: [
+        {
+          model: db.Usuario,
+          as: "Usuario",
+          attributes: ["id", "nome", "email"],
+        },
+        {
+          model: db.DemandaAluno,
+          as: "DemandaAlunos",
+          include: [
+            {
+              model: db.Aluno,
+              attributes: ["matricula", "nome", "email"],
+              include: [
+                {
+                  model: db.Curso,
+                  as: "Cursos",
+                  attributes: ["id", "nome"],
+                },
+                {
+                  model: db.Condicao,
+                  as: "Condicaos",
+                  attributes: ["id", "nome"],
+                  through: { attributes: [] },
+                },
+              ],
+            },
+          ],
+        },
+        {
+          model: db.AmparoLegal,
+          through: { attributes: [] },
+          attributes: ["id", "nome"],
+        },
+        {
+          model: db.Encaminhamentos,
+          as: "Encaminhamentos",
+          include: [
+            {
+              model: db.Usuario,
+              as: "Remetente",
+              attributes: ["id", "nome", "email"],
+            },
+            {
+              model: db.Usuario,
+              as: "Destinatario",
+              attributes: ["id", "nome", "email"],
+            },
+          ],
+        },
+        {
+          model: db.IntervencaoDemanda,
+          as: "IntervencoesDemandas",
+          include: [
+            {
+              model: db.Intervencao,
+              as: "Intervencao",
+              attributes: ["id", "descricao"],
+            },
+            {
+              model: db.Encaminhamentos,
+              as: "Encaminhamentos",
+              attributes: ["id"],
+              include: [
+                {
+                  model: db.Usuario,
+                  as: "Remetente",
+                  attributes: ["id", "nome", "email"],
+                },
+                {
+                  model: db.Usuario,
+                  as: "Destinatario",
+                  attributes: ["id", "nome", "email"],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    });
+
+    if (!demanda) {
+      return res.status(404).json({ mensagem: "Demanda não encontrada" });
+    }
+
+    res.status(200).json({ demanda });
+  } catch (erro) {
+    console.error("Erro ao buscar demanda por ID:", erro);
+    res.status(500).json({ mensagem: "Erro ao buscar demanda" });
+  }
+};

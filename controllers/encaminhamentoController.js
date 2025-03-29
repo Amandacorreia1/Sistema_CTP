@@ -77,9 +77,8 @@ export const criarEncaminhamento = async (req, res) => {
         ...demandaAtualizada.toJSON(),
         destinatarios: destinatariosFormatados,
       },
-      mensagem: `Encaminhamento${
-        destinatarios.length > 1 ? "s" : ""
-      } realizado${destinatarios.length > 1 ? "s" : ""} com sucesso!`,
+      mensagem: `Encaminhamento${destinatarios.length > 1 ? "s" : ""
+        } realizado${destinatarios.length > 1 ? "s" : ""} com sucesso!`,
     });
   } catch (error) {
     console.error("Erro ao processar encaminhamento:", error);
