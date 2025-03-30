@@ -1,9 +1,9 @@
 import db from '../models/index.js';
 
 export const criarIntervencaoDemanda = async (req, res) => {
-  const { intervencao_id, demanda_id, data, descricao, encaminhamento_id } = req.body;
+  const { intervencao_id, demanda_id, data, encaminhamento_id } = req.body;
 
-  if (!intervencao_id || !demanda_id || !data || !descricao || !encaminhamento_id) {
+  if (!intervencao_id || !demanda_id || !data || !encaminhamento_id) {
     return res.status(400).json({ mensagem: 'Todos os campos são obrigatórios.' });
   }
 
@@ -21,7 +21,6 @@ export const criarIntervencaoDemanda = async (req, res) => {
       demanda_id,
       encaminhamento_id,
       data,
-      descricao,
       usuario_id
     });
 

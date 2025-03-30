@@ -37,10 +37,6 @@ export default (sequelize) => {
     data: {
       type: DataTypes.DATE,
       allowNull: false
-    },
-    descricao: {
-      type: DataTypes.STRING,
-      allowNull: false
     }
   }, {
     sequelize,
