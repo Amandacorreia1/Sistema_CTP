@@ -251,26 +251,26 @@ export const listarDemandaPorId = async (req, res) => {
       include: [
         {
           model: db.Usuario,
-          as: 'Usuarios',
-          attributes: ['id', 'nome', 'email'],
+          as: "Usuarios",
+          attributes: ["id", "nome", "email"],
         },
         {
           model: db.DemandaAluno,
-          as: 'DemandaAlunos',
+          as: "DemandaAlunos",
           include: [
             {
               model: db.Aluno,
-              attributes: ['matricula', 'nome', 'email'],
+              attributes: ["matricula", "nome", "email"],
               include: [
                 {
                   model: db.Curso,
-                  as: 'Cursos',
-                  attributes: ['id', 'nome'],
+                  as: "Cursos",
+                  attributes: ["id", "nome"],
                 },
                 {
                   model: db.Condicao,
-                  as: 'Condicaos',
-                  attributes: ['id', 'nome'],
+                  as: "Condicaos",
+                  attributes: ["id", "nome"],
                   through: { attributes: [] },
                 },
               ],
@@ -280,54 +280,54 @@ export const listarDemandaPorId = async (req, res) => {
         {
           model: db.AmparoLegal,
           through: { attributes: [] },
-          attributes: ['id', 'nome'],
+          attributes: ["id", "nome"],
         },
         {
           model: db.Encaminhamentos,
-          as: 'Encaminhamentos',
+          as: "Encaminhamentos",
           include: [
             {
               model: db.Usuario,
-              as: 'Remetente',
-              attributes: ['id', 'nome', 'email'],
+              as: "Remetente",
+              attributes: ["id", "nome", "email"],
             },
             {
               model: db.Usuario,
-              as: 'Destinatario',
-              attributes: ['id', 'nome', 'email'],
+              as: "Destinatario",
+              attributes: ["id", "nome", "email"],
             },
           ],
         },
         {
           model: db.IntervencaoDemanda,
-          as: 'IntervencoesDemandas',
+          as: "IntervencoesDemandas",
           include: [
             {
               model: db.Intervencao,
-              as: 'Intervencao',
-              attributes: ['id', 'descricao'],
+              as: "Intervencao",
+              attributes: ["id", "descricao"],
             },
             {
               model: db.Encaminhamentos,
-              as: 'Encaminhamentos',
-              attributes: ['id'],
+              as: "Encaminhamentos",
+              attributes: ["id"],
               include: [
                 {
                   model: db.Usuario,
-                  as: 'Remetente',
-                  attributes: ['id', 'nome', 'email'],
+                  as: "Remetente",
+                  attributes: ["id", "nome", "email"],
                 },
                 {
                   model: db.Usuario,
-                  as: 'Destinatario',
-                  attributes: ['id', 'nome', 'email'],
+                  as: "Destinatario",
+                  attributes: ["id", "nome", "email"],
                 },
               ],
             },
             {
               model: db.Usuario,
-              as: 'Usuarios', 
-              attributes: ['id', 'nome', 'email'],
+              as: "Usuarios",
+              attributes: ["id", "nome", "email"],
             },
           ],
         },
@@ -335,12 +335,121 @@ export const listarDemandaPorId = async (req, res) => {
     });
 
     if (!demanda) {
-      return res.status(404).json({ mensagem: 'Demanda não encontrada' });
+      return res.status(404).json({ mensagem: "Demanda não encontrada" });
     }
 
     res.status(200).json({ demanda });
   } catch (erro) {
-    console.error('Erro ao buscar demanda por ID:', erro);
-    res.status(500).json({ mensagem: 'Erro ao buscar demanda' });
+    console.error("Erro ao buscar demanda por ID:", erro);
+    res.status(500).json({ mensagem: "Erro ao buscar demanda" });
+  }
+};
+
+export const fecharDemanda = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const usuario_id = req.usuario.id;
+
+    const demanda = await db.Demanda.findOne({
+      where: { id },
+      include: [
+        {
+          model: db.IntervencaoDemanda,
+          as: "IntervencoesDemandas",
+          include: [
+            {
+              model: db.Intervencao,
+              as: "Intervencao",
+            },
+            {
+              model: db.Encaminhamentos,
+              as: "Encaminhamentos",
+              include: [
+                { model: db.Usuario, as: "Remetente" },
+                { model: db.Usuario, as: "Destinatario" },
+              ],
+            },
+          ],
+        },
+        {
+          model: db.Encaminhamentos,
+          as: "Encaminhamentos",
+          include: [
+            { model: db.Usuario, as: "Remetente" },
+            { model: db.Usuario, as: "Destinatario" },
+          ],
+        },
+        {
+          model: db.Usuario,
+          as: "Usuarios",
+          include: [{ model: db.Cargo, as: "Cargo", attributes: ["nome"] }],
+        },
+      ],
+    });
+
+    if (!demanda) {
+      return res.status(404).json({ mensagem: "Demanda não encontrada" });
+    }
+
+    if (
+      !demanda.IntervencoesDemandas ||
+      demanda.IntervencoesDemandas.length === 0
+    ) {
+      return res.status(400).json({
+        mensagem:
+          "A demanda não pode ser fechada sem pelo menos uma intervenção realizada",
+      });
+    }
+
+    if (demanda.status === false) {
+      return res.status(400).json({
+        mensagem: "Esta demanda já está fechada",
+      });
+    }
+
+    const encaminhamentos = demanda.Encaminhamentos.sort((a, b) => b.id - a.id);
+
+    const usuarioCriador = demanda.Usuarios;
+    const isFuncionarioCTP = usuarioCriador.Cargo?.nome === "Funcionario CTP";
+    const isCriador = demanda.usuario_id === usuario_id;
+
+    if (encaminhamentos.length > 0) {
+      const ultimoEncaminhamento = encaminhamentos[0];
+
+      if (isCriador && isFuncionarioCTP) {
+      } else if (ultimoEncaminhamento.destinatario_id !== usuario_id) {
+        return res.status(403).json({
+          mensagem:
+            "Apenas o último destinatário pode fechar esta demanda no momento, a menos que você seja o criador e Funcionario CTP",
+        });
+      }
+    } else {
+      if (!isCriador) {
+        return res.status(403).json({
+          mensagem:
+            "Apenas o criador pode fechar esta demanda, pois não foi encaminhada",
+        });
+      }
+    }
+
+    await db.Demanda.update(
+      {
+        status: false,
+      },
+      { where: { id } }
+    );
+
+    const demandaAtualizada = await db.Demanda.findByPk(id);
+
+    return res.status(200).json({
+      mensagem: "Demanda fechada com sucesso",
+      demanda: demandaAtualizada,
+    });
+  } catch (erro) {
+    console.error("Erro ao fechar demanda:", erro);
+    return res.status(500).json({
+      mensagem: "Erro ao fechar demanda",
+      erro: erro.message,
+    });
   }
 };
