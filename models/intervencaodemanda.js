@@ -8,6 +8,7 @@ export default (sequelize) => {
       IntervencaoDemanda.belongsTo(models.Demanda, { foreignKey: 'demanda_id', as: 'Demanda' });
       IntervencaoDemanda.belongsTo(models.Intervencao, { foreignKey: 'intervencao_id', as: 'Intervencao' });
       IntervencaoDemanda.belongsTo(models.Encaminhamentos, { foreignKey: 'encaminhamento_id', as: 'Encaminhamentos' });
+      IntervencaoDemanda.belongsTo(models.Usuario, { foreignKey: 'usuario_id', as: 'Usuarios' });
     }
   }
   IntervencaoDemanda.init({
@@ -31,6 +32,13 @@ export default (sequelize) => {
       type: DataTypes.INTEGER,
       allowNull: false,
       references: { model: 'Encaminhamentos', key: 'id' },
+      onUpdate: 'CASCADE',
+      onDelete: 'RESTRICT'
+    },
+    usuario_id: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: { model: 'Usuarios', key: 'id' },
       onUpdate: 'CASCADE',
       onDelete: 'RESTRICT'
     },

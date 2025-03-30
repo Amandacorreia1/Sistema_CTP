@@ -136,7 +136,7 @@ export const listarDemandasUsuario = async (req, res) => {
           {
             model: db.Usuario,
             attributes: ["id", "nome", "email"],
-            as: "Usuario",
+            as: "Usuarios",
             include: [{ model: db.Cargo, as: "Cargo", attributes: ["nome"] }],
           },
           {
@@ -181,7 +181,7 @@ export const listarDemandasUsuario = async (req, res) => {
           {
             model: db.Usuario,
             attributes: ["id", "nome", "email"],
-            as: "Usuario",
+            as: "Usuarios",
             include: [{ model: db.Cargo, as: "Cargo", attributes: ["nome"] }],
           },
           {
@@ -251,26 +251,26 @@ export const listarDemandaPorId = async (req, res) => {
       include: [
         {
           model: db.Usuario,
-          as: "Usuario",
-          attributes: ["id", "nome", "email"],
+          as: 'Usuarios',
+          attributes: ['id', 'nome', 'email'],
         },
         {
           model: db.DemandaAluno,
-          as: "DemandaAlunos",
+          as: 'DemandaAlunos',
           include: [
             {
               model: db.Aluno,
-              attributes: ["matricula", "nome", "email"],
+              attributes: ['matricula', 'nome', 'email'],
               include: [
                 {
                   model: db.Curso,
-                  as: "Cursos",
-                  attributes: ["id", "nome"],
+                  as: 'Cursos',
+                  attributes: ['id', 'nome'],
                 },
                 {
                   model: db.Condicao,
-                  as: "Condicaos",
-                  attributes: ["id", "nome"],
+                  as: 'Condicaos',
+                  attributes: ['id', 'nome'],
                   through: { attributes: [] },
                 },
               ],
@@ -280,49 +280,54 @@ export const listarDemandaPorId = async (req, res) => {
         {
           model: db.AmparoLegal,
           through: { attributes: [] },
-          attributes: ["id", "nome"],
+          attributes: ['id', 'nome'],
         },
         {
           model: db.Encaminhamentos,
-          as: "Encaminhamentos",
+          as: 'Encaminhamentos',
           include: [
             {
               model: db.Usuario,
-              as: "Remetente",
-              attributes: ["id", "nome", "email"],
+              as: 'Remetente',
+              attributes: ['id', 'nome', 'email'],
             },
             {
               model: db.Usuario,
-              as: "Destinatario",
-              attributes: ["id", "nome", "email"],
+              as: 'Destinatario',
+              attributes: ['id', 'nome', 'email'],
             },
           ],
         },
         {
           model: db.IntervencaoDemanda,
-          as: "IntervencoesDemandas",
+          as: 'IntervencoesDemandas',
           include: [
             {
               model: db.Intervencao,
-              as: "Intervencao",
-              attributes: ["id", "descricao"],
+              as: 'Intervencao',
+              attributes: ['id', 'descricao'],
             },
             {
               model: db.Encaminhamentos,
-              as: "Encaminhamentos",
-              attributes: ["id"],
+              as: 'Encaminhamentos',
+              attributes: ['id'],
               include: [
                 {
                   model: db.Usuario,
-                  as: "Remetente",
-                  attributes: ["id", "nome", "email"],
+                  as: 'Remetente',
+                  attributes: ['id', 'nome', 'email'],
                 },
                 {
                   model: db.Usuario,
-                  as: "Destinatario",
-                  attributes: ["id", "nome", "email"],
+                  as: 'Destinatario',
+                  attributes: ['id', 'nome', 'email'],
                 },
               ],
+            },
+            {
+              model: db.Usuario,
+              as: 'Usuarios', 
+              attributes: ['id', 'nome', 'email'],
             },
           ],
         },
@@ -330,12 +335,12 @@ export const listarDemandaPorId = async (req, res) => {
     });
 
     if (!demanda) {
-      return res.status(404).json({ mensagem: "Demanda não encontrada" });
+      return res.status(404).json({ mensagem: 'Demanda não encontrada' });
     }
 
     res.status(200).json({ demanda });
   } catch (erro) {
-    console.error("Erro ao buscar demanda por ID:", erro);
-    res.status(500).json({ mensagem: "Erro ao buscar demanda" });
+    console.error('Erro ao buscar demanda por ID:', erro);
+    res.status(500).json({ mensagem: 'Erro ao buscar demanda' });
   }
 };

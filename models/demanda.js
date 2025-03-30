@@ -5,7 +5,7 @@ import { DataTypes } from "sequelize";
 export default (sequelize) => {
   class Demanda extends Model {
     static associate(models) {
-      Demanda.belongsTo(models.Usuario, { foreignKey: "usuario_id", as: "Usuario" });
+      Demanda.belongsTo(models.Usuario, { foreignKey: "usuario_id", as: "Usuarios" });
       Demanda.belongsToMany(models.AmparoLegal, {
         through: "AmparoDemandas",
         foreignKey: "demanda_id",

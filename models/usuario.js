@@ -11,7 +11,7 @@ export default (sequelize) => {
       Usuario.hasMany(models.Demanda, { foreignKey: 'usuario_id' });
       Usuario.hasMany(models.Encaminhamentos, { foreignKey: 'usuario_id', as: 'EncaminhamentosRemetente' });
       Usuario.hasMany(models.Encaminhamentos, { foreignKey: 'destinatario_id', as: 'EncaminhamentosDestinatario' });
-
+      Usuario.hasMany(models.IntervencaoDemanda, { foreignKey: 'usuario_id', as: 'IntervencaoDemanda' });
     }
   }
   Usuario.init({
