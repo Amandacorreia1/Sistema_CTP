@@ -67,6 +67,55 @@ export const criarDemanda = async (req, res) => {
       console.log("Amparos associados com sucesso");
     }
 
+    const cargosParaEncaminhar = [
+      "Funcionario CTP",
+      "Diretor Geral",
+      "Diretor Ensino",
+    ];
+    const usuariosDestinatarios = await db.Usuario.findAll({
+      where: {
+        id: { [db.Sequelize.Op.ne]: usuario_id },
+      },
+      include: [
+        {
+          model: db.Cargo,
+          as: "Cargo",
+          where: { nome: { [db.Sequelize.Op.in]: cargosParaEncaminhar } },
+          attributes: ["nome"],
+        },
+      ],
+      attributes: ["id"],
+    });
+
+    if (usuariosDestinatarios.length > 0) {
+      const encaminhamentosData = usuariosDestinatarios.map((destinatario) => ({
+        demanda_id: novaDemanda.id,
+        usuario_id: usuario_id,
+        destinatario_id: destinatario.id,
+        descricao:
+          "Notificação formal aos superiores para ciência e acompanhamento da demanda",
+        data: new Date(),
+      }));
+      console.log("Dados para Encaminhamentos:", encaminhamentosData);
+      await db.Encaminhamentos.bulkCreate(encaminhamentosData, {
+        validate: true,
+        fields: [
+          "demanda_id",
+          "usuario_id",
+          "destinatario_id",
+          "descricao",
+          "data",
+        ],
+      });
+      console.log(
+        `Encaminhamentos automáticos criados para ${usuariosDestinatarios.length} usuários`
+      );
+    } else {
+      console.warn(
+        "Nenhum usuário encontrado com os cargos especificados para encaminhamento automático (excluindo o criador)"
+      );
+    }
+
     return res.status(201).json({
       mensagem: "Demanda criada com sucesso",
       demanda: novaDemanda,
