@@ -59,9 +59,6 @@ const enviarEmailEncaminhamento = async (
       where: { id: destinatariosIds },
       attributes: ["id", "nome", "email"],
     });
-
-    console.log("Destinatários para envio de e-mail:", destinatarios);
-
     const formatDateToDisplay = (isoDate) => {
       const date = new Date(isoDate);
       return `${date.getDate().toString().padStart(2, "0")}/${(
@@ -104,10 +101,7 @@ const enviarEmailEncaminhamento = async (
           data
         )}\nAmparo legal: ${amparoLegal}\n\nAtenciosamente,\nCoordenação Técnico Pedagógica - CTP`,
       };
-
-      console.log(`Tentando enviar e-mail para ${destinatario.email}...`);
       await transporter.sendMail(mailOptions);
-      console.log(`E-mail enviado com sucesso para ${destinatario.email}`);
     }
   } catch (error) {
     console.error("Erro ao enviar e-mail de encaminhamento:", error);
@@ -138,9 +132,9 @@ export const criarDemanda = async (req, res) => {
       status: true,
       disciplina,
     });
-    console.log("Demanda criada:", novaDemanda.id);
 
     if (alunos && alunos.length > 0) {
+      const alunoIds = new Set();
       for (const aluno of alunos) {
         const alunoExistente = await db.Aluno.findByPk(aluno.id);
         if (!alunoExistente) {
@@ -148,10 +142,19 @@ export const criarDemanda = async (req, res) => {
             .status(404)
             .json({ mensagem: `Aluno com ID ${aluno.id} não encontrado.` });
         }
-        await db.DemandaAluno.create({
-          demanda_id: novaDemanda.id,
-          aluno_id: aluno.id,
+        if (alunoIds.has(aluno.id)) {
+          continue;
+        }
+        const duplicata = await db.DemandaAluno.findOne({
+          where: { demanda_id: novaDemanda.id, aluno_id: aluno.id },
         });
+        if (!duplicata) {
+          await db.DemandaAluno.create({
+            demanda_id: novaDemanda.id,
+            aluno_id: aluno.id,
+          });
+          alunoIds.add(aluno.id);
+        }
       }
       console.log("Alunos associados com sucesso");
     }
