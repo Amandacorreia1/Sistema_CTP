@@ -262,6 +262,7 @@ export const listarDemandasUsuario = async (req, res) => {
             ],
           },
         ],
+        order: [['createdAt', 'DESC']], 
       });
     }
 
@@ -378,7 +379,9 @@ export const listarDemandaPorId = async (req, res) => {
               as: "Usuarios",
               attributes: ["id", "nome", "email"],
             },
+
           ],
+          order: [['createdAt', 'DESC']],
         },
       ],
     });
