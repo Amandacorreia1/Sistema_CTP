@@ -6,17 +6,10 @@ export const criarEncaminhamento = async (req, res) => {
 
   try {
     if (!usuario_id) {
-      return res
-        .status(400)
-        .json({ error: "ID do usuário remetente não foi encontrado no token" });
+      return res.status(400).json({ error: "ID do usuário remetente não foi encontrado no token" });
     }
-    if (
-      !destinatario_id ||
-      (Array.isArray(destinatario_id) && destinatario_id.length === 0)
-    ) {
-      return res
-        .status(400)
-        .json({ error: "Informe pelo menos um destinatário" });
+    if (!destinatario_id || (Array.isArray(destinatario_id) && destinatario_id.length === 0)) {
+      return res.status(400).json({ error: "Informe pelo menos um destinatário" });
     }
     if (!demanda_id) {
       return res.status(400).json({ error: "ID da demanda é obrigatório" });
@@ -31,9 +24,8 @@ export const criarEncaminhamento = async (req, res) => {
     }
 
     const dataAtual = new Date();
-    const destinatarios = Array.isArray(destinatario_id)
-      ? destinatario_id
-      : [destinatario_id];
+
+    const destinatarios = Array.isArray(destinatario_id) ? destinatario_id : [destinatario_id];
     const encaminhamentos = [];
 
     for (const destId of destinatarios) {
@@ -64,27 +56,38 @@ export const criarEncaminhamento = async (req, res) => {
       ],
     });
 
-    const destinatariosFormatados = demandaAtualizada.Encaminhamentos.map(
-      (enc) => ({
-        id: enc.Destinatario.id,
-        nome: enc.Destinatario.nome,
-      })
-    );
+    const destinatariosFormatados = demandaAtualizada.Encaminhamentos.map((enc) => ({
+      id: enc.Destinatario.id,
+      nome: enc.Destinatario.nome,
+    }));
+
+    const formatDateToDisplay = (isoDate) => {
+      const date = new Date(isoDate);
+      return `${date.getDate().toString().padStart(2, "0")}/${(date.getMonth() + 1)
+        .toString()
+        .padStart(2, "0")}/${date.getFullYear()}`;
+    };
 
     return res.status(201).json({
-      encaminhamentos,
+      encaminhamentos: encaminhamentos.map((enc) => ({
+        ...enc.toJSON(),
+        data: formatDateToDisplay(enc.data),
+      })),
       demanda: {
         ...demandaAtualizada.toJSON(),
         destinatarios: destinatariosFormatados,
+        data: formatDateToDisplay(dataAtual),
       },
-      mensagem: `Encaminhamento${destinatarios.length > 1 ? "s" : ""
-        } realizado${destinatarios.length > 1 ? "s" : ""} com sucesso!`,
+      mensagem: `Encaminhamento${destinatarios.length > 1 ? "s" : ""} realizado${
+        destinatarios.length > 1 ? "s" : ""
+      } com sucesso!`,
     });
   } catch (error) {
     console.error("Erro ao processar encaminhamento:", error);
     return res.status(500).json({ error: "Erro interno no servidor" });
   }
 };
+
 
 export const listarEncaminhamentosPorUsuario = async (req, res) => {
   const { id } = req.params;
