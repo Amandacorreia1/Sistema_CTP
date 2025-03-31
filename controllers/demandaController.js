@@ -262,7 +262,7 @@ export const listarDemandasUsuario = async (req, res) => {
             ],
           },
         ],
-        order: [['createdAt', 'DESC']], 
+        order: [['createdAt', 'DESC']],
       });
     }
 
