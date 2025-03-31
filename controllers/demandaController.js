@@ -14,14 +14,6 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-transporter.verify((error, success) => {
-  if (error) {
-    console.error("Erro ao verificar o transporter:", error);
-  } else {
-    console.log("Transporter configurado corretamente");
-  }
-});
-
 const enviarEmailEncaminhamento = async (remetenteNome, destinatariosIds, demandaId, descricao, data) => {
   try {
     const demanda = await db.Demanda.findByPk(demandaId);

@@ -14,13 +14,6 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-transporter.verify((error, success) => {
-  if (error) {
-    console.error("Erro ao verificar o transporter:", error);
-  } else {
-    console.log("Transporter configurado corretamente");
-  }
-});
 
 const enviarEmailEncaminhamento = async (remetenteNome, destinatariosIds, demandaId, descricao, data) => {
   try {
@@ -66,7 +59,6 @@ const enviarEmailEncaminhamento = async (remetenteNome, destinatariosIds, demand
   }
 };
 
-// Função criarDemanda simplificada, sem encaminhamentos automáticos
 export const criarDemanda = async (req, res) => {
   const { descricao, disciplina, status, usuario_id } = req.body;
 
@@ -95,7 +87,7 @@ export const criarDemanda = async (req, res) => {
   }
 };
 
-// Função para encaminhamentos manuais
+
 export const criarEncaminhamento = async (req, res) => {
   const { destinatario_id, demanda_id, descricao } = req.body;
   const usuario_id = req.usuario.id;
