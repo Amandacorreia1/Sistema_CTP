@@ -13,11 +13,42 @@ const transporter = nodemailer.createTransport({
     pass: process.env.EMAIL_PASS,
   },
 });
-
-
-const enviarEmailEncaminhamento = async (remetenteNome, destinatariosIds, demandaId, descricao, data) => {
+const enviarEmailEncaminhamento = async (
+  remetenteNome,
+  destinatariosIds,
+  demandaId,
+  descricao,
+  data
+) => {
   try {
-    const demanda = await db.Demanda.findByPk(demandaId);
+    const demanda = await db.Demanda.findByPk(demandaId, {
+      include: [
+        {
+          model: db.DemandaAluno,
+          as: "DemandaAlunos",
+          include: [
+            {
+              model: db.Aluno,
+              as: "Aluno",
+              attributes: ["nome"],
+              include: [
+                {
+                  model: db.Curso,
+                  as: "Cursos",
+                  attributes: ["nome"],
+                },
+              ],
+            },
+          ],
+        },
+        {
+          model: db.AmparoLegal,
+          through: { attributes: [] },
+          attributes: ["nome"],
+        },
+      ],
+    });
+
     if (!demanda) {
       console.error("Demanda não encontrada para envio de e-mail:", demandaId);
       return;
@@ -32,22 +63,45 @@ const enviarEmailEncaminhamento = async (remetenteNome, destinatariosIds, demand
 
     const formatDateToDisplay = (isoDate) => {
       const date = new Date(isoDate);
-      return `${date.getDate().toString().padStart(2, "0")}/${(date.getMonth() + 1)
+      return `${date.getDate().toString().padStart(2, "0")}/${(
+        date.getMonth() + 1
+      )
         .toString()
         .padStart(2, "0")}/${date.getFullYear()}`;
     };
 
+    const alunosEnvolvidos =
+      demanda.DemandaAlunos.length > 0
+        ? demanda.DemandaAlunos.map(
+            (da) =>
+              `${da.Aluno.nome} (${
+                da.Aluno.Cursos?.nome || "Curso não informado"
+              })`
+          ).join(", ")
+        : "Nenhum aluno envolvido";
+
+    const amparoLegal =
+      demanda.AmparoLegals.length > 0
+        ? demanda.AmparoLegals.map((amparo) => amparo.nome).join(", ")
+        : "Nenhum amparo legal associado";
+
     for (const destinatario of destinatarios) {
       if (!destinatario.email) {
-        console.error(`Destinatário ${destinatario.nome} (ID: ${destinatario.id}) não possui e-mail`);
+        console.error(
+          `Destinatário ${destinatario.nome} (ID: ${destinatario.id}) não possui e-mail`
+        );
         continue;
       }
 
       const mailOptions = {
         from: process.env.EMAIL_USER,
         to: destinatario.email,
-        subject: "Novo Encaminhamento Recebido",
-        text: `Olá ${destinatario.nome},\n\nVocê recebeu um novo encaminhamento de ${remetenteNome}.\n\nDemanda: ${demanda.id}\nDescrição: ${descricao}\nData: ${formatDateToDisplay(data)}\n\nAtenciosamente,\nCoordenação Técnico Pedagógica - CTP`,
+        subject: "Encaminhamento de Demanda",
+        text: `Olá ${
+          destinatario.nome
+        },\n\nVocê recebeu um novo encaminhamento de ${remetenteNome}.\n\nDescrição da demanda: ${descricao}\nAlunos envolvidos: ${alunosEnvolvidos}\nData da demanda: ${formatDateToDisplay(
+          data
+        )}\nAmparo legal: ${amparoLegal}\n\nAtenciosamente,\nCoordenação Técnico Pedagógica - CTP`,
       };
 
       console.log(`Tentando enviar e-mail para ${destinatario.email}...`);
@@ -67,7 +121,9 @@ export const criarDemanda = async (req, res) => {
       return res.status(400).json({ error: "ID do usuário é obrigatório" });
     }
     if (!descricao || descricao.trim() === "") {
-      return res.status(400).json({ error: "Descrição da demanda é obrigatória" });
+      return res
+        .status(400)
+        .json({ error: "Descrição da demanda é obrigatória" });
     }
 
     const novaDemanda = await db.Demanda.create({
@@ -87,17 +143,23 @@ export const criarDemanda = async (req, res) => {
   }
 };
 
-
 export const criarEncaminhamento = async (req, res) => {
   const { destinatario_id, demanda_id, descricao } = req.body;
   const usuario_id = req.usuario.id;
 
   try {
     if (!usuario_id) {
-      return res.status(400).json({ error: "ID do usuário remetente não foi encontrado no token" });
+      return res
+        .status(400)
+        .json({ error: "ID do usuário remetente não foi encontrado no token" });
     }
-    if (!destinatario_id || (Array.isArray(destinatario_id) && destinatario_id.length === 0)) {
-      return res.status(400).json({ error: "Informe pelo menos um destinatário" });
+    if (
+      !destinatario_id ||
+      (Array.isArray(destinatario_id) && destinatario_id.length === 0)
+    ) {
+      return res
+        .status(400)
+        .json({ error: "Informe pelo menos um destinatário" });
     }
     if (!demanda_id) {
       return res.status(400).json({ error: "ID da demanda é obrigatório" });
@@ -112,7 +174,9 @@ export const criarEncaminhamento = async (req, res) => {
     }
 
     const dataAtual = new Date();
-    const destinatarios = Array.isArray(destinatario_id) ? destinatario_id : [destinatario_id];
+    const destinatarios = Array.isArray(destinatario_id)
+      ? destinatario_id
+      : [destinatario_id];
     const encaminhamentos = [];
 
     for (const destId of destinatarios) {
@@ -126,12 +190,20 @@ export const criarEncaminhamento = async (req, res) => {
       encaminhamentos.push(novoEncaminhamento);
     }
 
-    const remetente = await db.Usuario.findByPk(usuario_id, { attributes: ["nome"] });
+    const remetente = await db.Usuario.findByPk(usuario_id, {
+      attributes: ["nome"],
+    });
     if (!remetente) {
       return res.status(404).json({ error: "Remetente não encontrado" });
     }
 
-    await enviarEmailEncaminhamento(remetente.nome, destinatarios, demanda_id, descricao, dataAtual);
+    await enviarEmailEncaminhamento(
+      remetente.nome,
+      destinatarios,
+      demanda_id,
+      descricao,
+      dataAtual
+    );
 
     const demandaAtualizada = await db.Demanda.findByPk(demanda_id, {
       include: [
@@ -152,15 +224,19 @@ export const criarEncaminhamento = async (req, res) => {
 
     const formatDateToDisplay = (isoDate) => {
       const date = new Date(isoDate);
-      return `${date.getDate().toString().padStart(2, "0")}/${(date.getMonth() + 1)
+      return `${date.getDate().toString().padStart(2, "0")}/${(
+        date.getMonth() + 1
+      )
         .toString()
         .padStart(2, "0")}/${date.getFullYear()}`;
     };
 
-    const destinatariosFormatados = demandaAtualizada.Encaminhamentos.map((enc) => ({
-      id: enc.Destinatario.id,
-      nome: enc.Destinatario.nome,
-    }));
+    const destinatariosFormatados = demandaAtualizada.Encaminhamentos.map(
+      (enc) => ({
+        id: enc.Destinatario.id,
+        nome: enc.Destinatario.nome,
+      })
+    );
 
     return res.status(201).json({
       encaminhamentos: encaminhamentos.map((enc) => ({
@@ -172,16 +248,15 @@ export const criarEncaminhamento = async (req, res) => {
         destinatarios: destinatariosFormatados,
         data: formatDateToDisplay(demanda.createdAt),
       },
-      mensagem: `Encaminhamento${destinatarios.length > 1 ? "s" : ""} realizado${
+      mensagem: `Encaminhamento${
         destinatarios.length > 1 ? "s" : ""
-      } com sucesso!`,
+      } realizado${destinatarios.length > 1 ? "s" : ""} com sucesso!`,
     });
   } catch (error) {
     console.error("Erro ao processar encaminhamento:", error);
     return res.status(500).json({ error: "Erro interno no servidor" });
   }
 };
-
 
 export const listarEncaminhamentosPorUsuario = async (req, res) => {
   const { id } = req.params;

@@ -14,9 +14,42 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-const enviarEmailEncaminhamento = async (remetenteNome, destinatariosIds, demandaId, descricao, data) => {
+const enviarEmailEncaminhamento = async (
+  remetenteNome,
+  destinatariosIds,
+  demandaId,
+  descricao,
+  data
+) => {
   try {
-    const demanda = await db.Demanda.findByPk(demandaId);
+    const demanda = await db.Demanda.findByPk(demandaId, {
+      include: [
+        {
+          model: db.DemandaAluno,
+          as: "DemandaAlunos",
+          include: [
+            {
+              model: db.Aluno,
+              as: "Aluno",
+              attributes: ["nome"],
+              include: [
+                {
+                  model: db.Curso,
+                  as: "Cursos",
+                  attributes: ["nome"],
+                },
+              ],
+            },
+          ],
+        },
+        {
+          model: db.AmparoLegal,
+          through: { attributes: [] },
+          attributes: ["nome"],
+        },
+      ],
+    });
+
     if (!demanda) {
       console.error("Demanda não encontrada para envio de e-mail:", demandaId);
       return;
@@ -31,22 +64,45 @@ const enviarEmailEncaminhamento = async (remetenteNome, destinatariosIds, demand
 
     const formatDateToDisplay = (isoDate) => {
       const date = new Date(isoDate);
-      return `${date.getDate().toString().padStart(2, "0")}/${(date.getMonth() + 1)
+      return `${date.getDate().toString().padStart(2, "0")}/${(
+        date.getMonth() + 1
+      )
         .toString()
         .padStart(2, "0")}/${date.getFullYear()}`;
     };
 
+    const alunosEnvolvidos =
+      demanda.DemandaAlunos.length > 0
+        ? demanda.DemandaAlunos.map(
+            (da) =>
+              `${da.Aluno.nome} (${
+                da.Aluno.Cursos?.nome || "Curso não informado"
+              })`
+          ).join(", ")
+        : "Nenhum aluno envolvido";
+
+    const amparoLegal =
+      demanda.AmparoLegals.length > 0
+        ? demanda.AmparoLegals.map((amparo) => amparo.nome).join(", ")
+        : "Nenhum amparo legal associado";
+
     for (const destinatario of destinatarios) {
       if (!destinatario.email) {
-        console.error(`Destinatário ${destinatario.nome} (ID: ${destinatario.id}) não possui e-mail`);
+        console.error(
+          `Destinatário ${destinatario.nome} (ID: ${destinatario.id}) não possui e-mail`
+        );
         continue;
       }
 
       const mailOptions = {
         from: process.env.EMAIL_USER,
         to: destinatario.email,
-        subject: "Novo Encaminhamento Recebido",
-        text: `Olá ${destinatario.nome},\n\nVocê recebeu um novo encaminhamento de ${remetenteNome}.\n\nDemanda: ${demanda.id}\nDescrição: ${descricao}\nData: ${formatDateToDisplay(data)}\n\nAtenciosamente,\nCoordenação Técnico Pedagógica - CTP`,
+        subject: "Encaminhamento de Demanda",
+        text: `Olá ${
+          destinatario.nome
+        },\n\nVocê recebeu um novo encaminhamento de ${remetenteNome}.\n\nDescrição da demanda: ${descricao}\nAlunos envolvidos: ${alunosEnvolvidos}\nData da demanda: ${formatDateToDisplay(
+          data
+        )}\nAmparo legal: ${amparoLegal}\n\nAtenciosamente,\nCoordenação Técnico Pedagógica - CTP`,
       };
 
       console.log(`Tentando enviar e-mail para ${destinatario.email}...`);
@@ -59,7 +115,8 @@ const enviarEmailEncaminhamento = async (remetenteNome, destinatariosIds, demand
 };
 
 export const criarDemanda = async (req, res) => {
-  const { id, descricao, status, disciplina, usuario_id, alunos, amparoLegal } = req.body;
+  const { id, descricao, status, disciplina, usuario_id, alunos, amparoLegal } =
+    req.body;
 
   try {
     console.log("Payload recebido:", req.body);
@@ -70,7 +127,9 @@ export const criarDemanda = async (req, res) => {
     }
 
     if (!alunos) {
-      return res.status(404).json({ mensagem: "Os alunos não foram informados." });
+      return res
+        .status(404)
+        .json({ mensagem: "Os alunos não foram informados." });
     }
 
     const novaDemanda = await db.Demanda.create({
@@ -85,7 +144,9 @@ export const criarDemanda = async (req, res) => {
       for (const aluno of alunos) {
         const alunoExistente = await db.Aluno.findByPk(aluno.id);
         if (!alunoExistente) {
-          return res.status(404).json({ mensagem: `Aluno com ID ${aluno.id} não encontrado.` });
+          return res
+            .status(404)
+            .json({ mensagem: `Aluno com ID ${aluno.id} não encontrado.` });
         }
         await db.DemandaAluno.create({
           demanda_id: novaDemanda.id,
@@ -117,10 +178,14 @@ export const criarDemanda = async (req, res) => {
       console.log("Amparos associados com sucesso");
     }
 
-    const cargosParaEncaminhar = ["Funcionario CTP", "Diretor Geral", "Diretor Ensino"];
+    const cargosParaEncaminhar = [
+      "Funcionario CTP",
+      "Diretor Geral",
+      "Diretor Ensino",
+    ];
     const usuariosDestinatarios = await db.Usuario.findAll({
       where: {
-        id: { [db.Sequelize.Op.ne]: usuario_id }, 
+        id: { [db.Sequelize.Op.ne]: usuario_id },
       },
       include: [
         {
@@ -130,7 +195,7 @@ export const criarDemanda = async (req, res) => {
           attributes: ["nome"],
         },
       ],
-      attributes: ["id", "nome", "email"], 
+      attributes: ["id", "nome", "email"],
     });
 
     if (usuariosDestinatarios.length > 0) {
@@ -138,19 +203,28 @@ export const criarDemanda = async (req, res) => {
         demanda_id: novaDemanda.id,
         usuario_id: usuario_id,
         destinatario_id: destinatario.id,
-        descricao: "Notificação formal aos superiores para ciência e acompanhamento da demanda",
+        descricao:
+          "Notificação formal aos superiores para ciência e acompanhamento da demanda",
         data: new Date(),
       }));
       console.log("Dados para Encaminhamentos:", encaminhamentosData);
       await db.Encaminhamentos.bulkCreate(encaminhamentosData, {
         validate: true,
-        fields: ["demanda_id", "usuario_id", "destinatario_id", "descricao", "data"],
+        fields: [
+          "demanda_id",
+          "usuario_id",
+          "destinatario_id",
+          "descricao",
+          "data",
+        ],
       });
-      console.log(`Encaminhamentos automáticos criados para ${usuariosDestinatarios.length} usuários`);
+      console.log(
+        `Encaminhamentos automáticos criados para ${usuariosDestinatarios.length} usuários`
+      );
 
       const destinatariosIds = usuariosDestinatarios.map((d) => d.id);
       await enviarEmailEncaminhamento(
-        usuario.nome, 
+        usuario.nome,
         destinatariosIds,
         novaDemanda.id,
         "Notificação formal aos superiores para ciência e acompanhamento da demanda",
@@ -168,10 +242,11 @@ export const criarDemanda = async (req, res) => {
     });
   } catch (erro) {
     console.error("Erro ao criar demanda:", erro);
-    return res.status(500).json({ mensagem: "Erro ao criar demanda", erro: erro.message });
+    return res
+      .status(500)
+      .json({ mensagem: "Erro ao criar demanda", erro: erro.message });
   }
 };
-
 
 export const listarDemandas = async (req, res) => {
   try {
@@ -307,7 +382,7 @@ export const listarDemandasUsuario = async (req, res) => {
             ],
           },
         ],
-        order: [['createdAt', 'DESC']],
+        order: [["createdAt", "DESC"]],
       });
     }
 
@@ -424,9 +499,8 @@ export const listarDemandaPorId = async (req, res) => {
               as: "Usuarios",
               attributes: ["id", "nome", "email"],
             },
-
           ],
-          order: [['createdAt', 'DESC']],
+          order: [["createdAt", "DESC"]],
         },
       ],
     });
