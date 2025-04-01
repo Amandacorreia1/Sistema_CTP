@@ -295,7 +295,6 @@ export const listarDemandasUsuario = async (req, res) => {
       return res.status(404).json({ mensagem: "Usuário não encontrado" });
     }
 
-    // Estrutura comum para includes
     const includeCommon = [
       {
         model: db.Usuario,
@@ -316,6 +315,13 @@ export const listarDemandasUsuario = async (req, res) => {
             model: db.Aluno,
             as: "Aluno",
             attributes: ["nome"],
+            include: [
+              {
+                model: db.Curso,
+                as: "Cursos",
+                attributes: ["id", "nome"],
+              },
+            ],
           },
         ],
       },
@@ -334,20 +340,16 @@ export const listarDemandasUsuario = async (req, res) => {
     ];
 
     let demandas;
-
-    // Busca as demandas de acordo com o cargo do usuário
     if (
       usuario.Cargo.nome === "Funcionario CTP" ||
       usuario.Cargo.nome === "Diretor Geral" ||
       usuario.Cargo.nome === "Diretor Ensino"
     ) {
-      // Se o usuário tiver um dos cargos especiais
       demandas = await db.Demanda.findAll({
         include: includeCommon,
-        order: [["createdAt", "DESC"]], // Ordenação em ordem decrescente
+        order: [["createdAt", "DESC"]],
       });
     } else {
-      // Se não for um cargo especial, busca de acordo com o ID do usuário
       demandas = await db.Demanda.findAll({
         where: {
           [db.Sequelize.Op.or]: [
@@ -356,18 +358,16 @@ export const listarDemandasUsuario = async (req, res) => {
           ],
         },
         include: includeCommon,
-        order: [["createdAt", "DESC"]], // Ordenação em ordem decrescente
+        order: [["createdAt", "DESC"]],
       });
     }
 
-    // Caso não encontre demandas
     if (demandas.length === 0) {
       return res
         .status(404)
         .json({ mensagem: "Nenhuma demanda encontrada para este usuário" });
     }
 
-    // Formatação das demandas para o retorno
     const demandasFormatadas = demandas.map((demanda) => ({
       ...demanda.toJSON(),
       destinatarios: demanda.Encaminhamentos.map((enc) => ({
@@ -376,8 +376,8 @@ export const listarDemandasUsuario = async (req, res) => {
       })),
     }));
 
-    // Retorno das demandas formatadas
     return res.status(200).json({ demandas: demandasFormatadas });
+
   } catch (erro) {
     console.error("Erro detalhado ao listar demandas do usuário:", {
       message: erro.message,
