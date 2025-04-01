@@ -71,11 +71,10 @@ const enviarEmailEncaminhamento = async (
     const alunosEnvolvidos =
       demanda.DemandaAlunos.length > 0
         ? demanda.DemandaAlunos.map(
-            (da) =>
-              `${da.Aluno.nome} (${
-                da.Aluno.Cursos?.nome || "Curso não informado"
-              })`
-          ).join(", ")
+          (da) =>
+            `${da.Aluno.nome} (${da.Aluno.Cursos?.nome || "Curso não informado"
+            })`
+        ).join(", ")
         : "Nenhum aluno envolvido";
 
     const amparoLegal =
@@ -95,11 +94,10 @@ const enviarEmailEncaminhamento = async (
         from: process.env.EMAIL_USER,
         to: destinatario.email,
         subject: "Encaminhamento de Demanda",
-        text: `Olá ${
-          destinatario.nome
-        },\n\nVocê recebeu um novo encaminhamento de ${remetenteNome}.\n\nDescrição da demanda: ${descricao}\nAlunos envolvidos: ${alunosEnvolvidos}\nData da demanda: ${formatDateToDisplay(
-          data
-        )}\nAmparo legal: ${amparoLegal}\n\nAtenciosamente,\nCoordenação Técnico Pedagógica - CTP`,
+        text: `Olá ${destinatario.nome
+          },\n\nVocê recebeu um novo encaminhamento de ${remetenteNome}.\n\nDescrição da demanda: ${descricao}\nAlunos envolvidos: ${alunosEnvolvidos}\nData da demanda: ${formatDateToDisplay(
+            data
+          )}\nAmparo legal: ${amparoLegal}\n\nAtenciosamente,\nCoordenação Técnico Pedagógica - CTP`,
       };
       await transporter.sendMail(mailOptions);
     }
@@ -297,51 +295,59 @@ export const listarDemandasUsuario = async (req, res) => {
       return res.status(404).json({ mensagem: "Usuário não encontrado" });
     }
 
+    // Estrutura comum para includes
+    const includeCommon = [
+      {
+        model: db.Usuario,
+        attributes: ["id", "nome", "email"],
+        as: "Usuarios",
+        include: [{ model: db.Cargo, as: "Cargo", attributes: ["nome"] }],
+      },
+      {
+        model: db.AmparoLegal,
+        through: { attributes: [] },
+        attributes: ["id", "nome"],
+      },
+      {
+        model: db.DemandaAluno,
+        as: "DemandaAlunos",
+        include: [
+          {
+            model: db.Aluno,
+            as: "Aluno",
+            attributes: ["nome"],
+          },
+        ],
+      },
+      {
+        model: db.Encaminhamentos,
+        as: "Encaminhamentos",
+        attributes: ["id", "descricao", "data"],
+        include: [
+          {
+            model: db.Usuario,
+            as: "Destinatario",
+            attributes: ["id", "nome"],
+          },
+        ],
+      },
+    ];
+
     let demandas;
+
+    // Busca as demandas de acordo com o cargo do usuário
     if (
       usuario.Cargo.nome === "Funcionario CTP" ||
       usuario.Cargo.nome === "Diretor Geral" ||
       usuario.Cargo.nome === "Diretor Ensino"
     ) {
+      // Se o usuário tiver um dos cargos especiais
       demandas = await db.Demanda.findAll({
-        include: [
-          {
-            model: db.Usuario,
-            attributes: ["id", "nome", "email"],
-            as: "Usuarios",
-            include: [{ model: db.Cargo, as: "Cargo", attributes: ["nome"] }],
-          },
-          {
-            model: db.AmparoLegal,
-            through: { attributes: [] },
-            attributes: ["id", "nome"],
-          },
-          {
-            model: db.DemandaAluno,
-            as: "DemandaAlunos",
-            include: [
-              {
-                model: db.Aluno,
-                as: "Aluno",
-                attributes: ["nome"],
-              },
-            ],
-          },
-          {
-            model: db.Encaminhamentos,
-            as: "Encaminhamentos",
-            attributes: ["id", "descricao", "data"],
-            include: [
-              {
-                model: db.Usuario,
-                as: "Destinatario",
-                attributes: ["id", "nome"],
-              },
-            ],
-          },
-        ],
+        include: includeCommon,
+        order: [["createdAt", "DESC"]], // Ordenação em ordem decrescente
       });
     } else {
+      // Se não for um cargo especial, busca de acordo com o ID do usuário
       demandas = await db.Demanda.findAll({
         where: {
           [db.Sequelize.Op.or]: [
@@ -349,52 +355,19 @@ export const listarDemandasUsuario = async (req, res) => {
             { "$Encaminhamentos.destinatario_id$": usuario_id },
           ],
         },
-        include: [
-          {
-            model: db.Usuario,
-            attributes: ["id", "nome", "email"],
-            as: "Usuarios",
-            include: [{ model: db.Cargo, as: "Cargo", attributes: ["nome"] }],
-          },
-          {
-            model: db.AmparoLegal,
-            through: { attributes: [] },
-            attributes: ["id", "nome"],
-          },
-          {
-            model: db.DemandaAluno,
-            as: "DemandaAlunos",
-            include: [
-              {
-                model: db.Aluno,
-                as: "Aluno",
-                attributes: ["nome"],
-              },
-            ],
-          },
-          {
-            model: db.Encaminhamentos,
-            as: "Encaminhamentos",
-            attributes: ["id", "descricao", "data"],
-            include: [
-              {
-                model: db.Usuario,
-                as: "Destinatario",
-                attributes: ["id", "nome"],
-              },
-            ],
-          },
-        ],
-        order: [["createdAt", "DESC"]],
+        include: includeCommon,
+        order: [["createdAt", "DESC"]], // Ordenação em ordem decrescente
       });
     }
 
+    // Caso não encontre demandas
     if (demandas.length === 0) {
       return res
         .status(404)
         .json({ mensagem: "Nenhuma demanda encontrada para este usuário" });
     }
 
+    // Formatação das demandas para o retorno
     const demandasFormatadas = demandas.map((demanda) => ({
       ...demanda.toJSON(),
       destinatarios: demanda.Encaminhamentos.map((enc) => ({
@@ -403,6 +376,7 @@ export const listarDemandasUsuario = async (req, res) => {
       })),
     }));
 
+    // Retorno das demandas formatadas
     return res.status(200).json({ demandas: demandasFormatadas });
   } catch (erro) {
     console.error("Erro detalhado ao listar demandas do usuário:", {

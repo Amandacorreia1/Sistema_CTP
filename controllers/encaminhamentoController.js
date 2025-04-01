@@ -73,11 +73,10 @@ const enviarEmailEncaminhamento = async (
     const alunosEnvolvidos =
       demanda.DemandaAlunos.length > 0
         ? demanda.DemandaAlunos.map(
-            (da) =>
-              `${da.Aluno.nome} (${
-                da.Aluno.Cursos?.nome || "Curso não informado"
-              })`
-          ).join(", ")
+          (da) =>
+            `${da.Aluno.nome} (${da.Aluno.Cursos?.nome || "Curso não informado"
+            })`
+        ).join(", ")
         : "Nenhum aluno envolvido";
 
     const amparoLegal =
@@ -97,11 +96,10 @@ const enviarEmailEncaminhamento = async (
         from: process.env.EMAIL_USER,
         to: destinatario.email,
         subject: "Encaminhamento de Demanda",
-        text: `Olá ${
-          destinatario.nome
-        },\n\nVocê recebeu um novo encaminhamento de ${remetenteNome}.\n\nDescrição da demanda: ${descricao}\nAlunos envolvidos: ${alunosEnvolvidos}\nData da demanda: ${formatDateToDisplay(
-          data
-        )}\nAmparo legal: ${amparoLegal}\n\nAtenciosamente,\nCoordenação Técnico Pedagógica - CTP`,
+        text: `Olá ${destinatario.nome
+          },\n\nVocê recebeu um novo encaminhamento de ${remetenteNome}.\n\nDescrição da demanda: ${descricao}\nAlunos envolvidos: ${alunosEnvolvidos}\nData da demanda: ${formatDateToDisplay(
+            data
+          )}\nAmparo legal: ${amparoLegal}\n\nAtenciosamente,\nCoordenação Técnico Pedagógica - CTP`,
       };
 
       console.log(`Tentando enviar e-mail para ${destinatario.email}...`);
@@ -248,9 +246,8 @@ export const criarEncaminhamento = async (req, res) => {
         destinatarios: destinatariosFormatados,
         data: formatDateToDisplay(demanda.createdAt),
       },
-      mensagem: `Encaminhamento${
-        destinatarios.length > 1 ? "s" : ""
-      } realizado${destinatarios.length > 1 ? "s" : ""} com sucesso!`,
+      mensagem: `Encaminhamento${destinatarios.length > 1 ? "s" : ""
+        } realizado${destinatarios.length > 1 ? "s" : ""} com sucesso!`,
     });
   } catch (error) {
     console.error("Erro ao processar encaminhamento:", error);

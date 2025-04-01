@@ -13,18 +13,8 @@ const router = express.Router();
 
 router.get("/demanda", autenticarToken, restringirAdmin(), listarDemandas);
 router.post("/criar-demanda", autenticarToken, restringirAdmin(), criarDemanda);
-router.get(
-  "/minhas-demandas",
-  autenticarToken,
-  restringirAdmin(),
-  listarDemandasUsuario
-);
-router.get(
-  "/demandas/:id",
-  autenticarToken,
-  restringirAdmin(),
-  listarDemandaPorId
-);
+router.get("/minhas-demandas", autenticarToken, restringirAdmin(), listarDemandasUsuario);
+router.get("/demandas/:id", autenticarToken, restringirAdmin(), listarDemandaPorId);
 router.put("/:id/fechar", autenticarToken, restringirAdmin(), fecharDemanda);
 
 export default router;
