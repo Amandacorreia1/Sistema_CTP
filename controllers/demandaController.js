@@ -482,11 +482,17 @@ export const listarDemandaPorId = async (req, res) => {
       ],
     });
 
+    const podeIntervir = true;
+    //primeiro verifica o cargo sendo CTP ou diren retorna sempre true
+    //pega o último encaminhamento desta demanda, se o usuário do último encaminhamento for o mesmo que está logado retorna true
+    //do contrário false
+
+
     if (!demanda) {
       return res.status(404).json({ mensagem: "Demanda não encontrada" });
     }
 
-    res.status(200).json({ demanda });
+    res.status(200).json({ demanda, podeIntervir });
   } catch (erro) {
     console.error("Erro ao buscar demanda por ID:", erro);
     res.status(500).json({ mensagem: "Erro ao buscar demanda" });
