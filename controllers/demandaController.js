@@ -297,7 +297,15 @@ export const listarDemandasUsuario = async (req, res) => {
       return res.status(404).json({ mensagem: "Usuário não encontrado" });
     }
 
-    const { nomeAluno, cursoId, dataInicio, tipoDemanda } = req.body;
+    const { nomeAluno, cursoId, date, tipoDemanda } = req.body || {};
+
+    console.log("Filtros recebidos:", {
+      nomeAluno,
+      cursoId,
+      date,
+      tipoDemanda,
+    });
+    console.log("Usuário logado ID:", usuario_id);
 
     const includeCommon = [
       {
@@ -346,6 +354,20 @@ export const listarDemandasUsuario = async (req, res) => {
     let whereClause = {};
     let demandas;
 
+    if (date) {
+      const startDate = new Date(date);
+      startDate.setUTCHours(0, 0, 0, 0);
+      const endDate = new Date(date);
+      endDate.setUTCHours(23, 59, 59, 999);
+
+      console.log("Filtro de data - startDate:", startDate.toISOString());
+      console.log("Filtro de data - endDate:", endDate.toISOString());
+
+      whereClause.createdAt = {
+        [db.Sequelize.Op.between]: [startDate, endDate],
+      };
+    }
+
     if (nomeAluno) {
       whereClause["$DemandaAlunos.Aluno.nome$"] = {
         [db.Sequelize.Op.like]: `%${nomeAluno}%`,
@@ -356,14 +378,6 @@ export const listarDemandasUsuario = async (req, res) => {
       whereClause["$DemandaAlunos.Aluno.Cursos.id$"] = cursoId;
     }
 
-    if (dataInicio) {
-      const startDate = new Date(dataInicio);
-      const endDate = new Date(startDate);
-      endDate.setHours(23, 59, 59, 999);
-      whereClause.createdAt = {
-        [db.Sequelize.Op.between]: [startDate, endDate],
-      };
-    }
     if (
       usuario.Cargo.nome === "Funcionario CTP" ||
       usuario.Cargo.nome === "Diretor Geral" ||
@@ -379,7 +393,12 @@ export const listarDemandasUsuario = async (req, res) => {
       if (tipoDemanda === "criadaPorMim") {
         tipoWhere = { usuario_id: usuario_id };
       } else if (tipoDemanda === "encaminhada") {
-        tipoWhere = { "$Encaminhamentos.destinatario_id$": usuario_id };
+        tipoWhere = {
+          [db.Sequelize.Op.and]: [
+            { "$Encaminhamentos.destinatario_id$": usuario_id },
+            { usuario_id: { [db.Sequelize.Op.ne]: usuario_id } },
+          ],
+        };
       } else {
         tipoWhere = {
           [db.Sequelize.Op.or]: [
@@ -388,6 +407,8 @@ export const listarDemandasUsuario = async (req, res) => {
           ],
         };
       }
+
+      console.log("Condição tipoWhere:", tipoWhere);
 
       demandas = await db.Demanda.findAll({
         where: {
@@ -399,6 +420,9 @@ export const listarDemandasUsuario = async (req, res) => {
     }
 
     if (demandas.length === 0) {
+      console.log("Nenhuma demanda encontrada com os filtros:", {
+        whereClause,
+      });
       return res
         .status(404)
         .json({ mensagem: "Nenhuma demanda encontrada para este usuário" });
