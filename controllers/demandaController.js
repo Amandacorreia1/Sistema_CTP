@@ -400,6 +400,7 @@ export const listarDemandaPorId = async (req, res) => {
           model: db.Usuario,
           as: "Usuarios",
           attributes: ["id", "nome", "email"],
+          include: [{ model: db.Cargo, as: "Cargo", attributes: ["nome"] }],
         },
         {
           model: db.DemandaAluno,
@@ -437,11 +438,13 @@ export const listarDemandaPorId = async (req, res) => {
               model: db.Usuario,
               as: "Remetente",
               attributes: ["id", "nome", "email"],
+              include: [{ model: db.Cargo, as: "Cargo", attributes: ["nome"] }],
             },
             {
               model: db.Usuario,
               as: "Destinatario",
               attributes: ["id", "nome", "email"],
+              include: [{ model: db.Cargo, as: "Cargo", attributes: ["nome"] }],
             },
           ],
         },
@@ -483,7 +486,7 @@ export const listarDemandaPorId = async (req, res) => {
     });
 
     const podeIntervir = true;
-    //primeiro verifica o cargo sendo CTP ou diren retorna sempre true
+    //primeiro verifica o cargo sendo Funcionario CTP, Diretor Ensino ou Diretor Geral retorna sempre true
     //pega o último encaminhamento desta demanda, se o usuário do último encaminhamento for o mesmo que está logado retorna true
     //do contrário false
 
