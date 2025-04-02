@@ -71,10 +71,11 @@ const enviarEmailEncaminhamento = async (
     const alunosEnvolvidos =
       demanda.DemandaAlunos.length > 0
         ? demanda.DemandaAlunos.map(
-          (da) =>
-            `${da.Aluno.nome} (${da.Aluno.Cursos?.nome || "Curso não informado"
-            })`
-        ).join(", ")
+            (da) =>
+              `${da.Aluno.nome} (${
+                da.Aluno.Cursos?.nome || "Curso não informado"
+              })`
+          ).join(", ")
         : "Nenhum aluno envolvido";
 
     const amparoLegal =
@@ -94,10 +95,11 @@ const enviarEmailEncaminhamento = async (
         from: process.env.EMAIL_USER,
         to: destinatario.email,
         subject: "Encaminhamento de Demanda",
-        text: `Olá ${destinatario.nome
-          },\n\nVocê recebeu um novo encaminhamento de ${remetenteNome}.\n\nDescrição da demanda: ${descricao}\nAlunos envolvidos: ${alunosEnvolvidos}\nData da demanda: ${formatDateToDisplay(
-            data
-          )}\nAmparo legal: ${amparoLegal}\n\nAtenciosamente,\nCoordenação Técnico Pedagógica - CTP`,
+        text: `Olá ${
+          destinatario.nome
+        },\n\nVocê recebeu um novo encaminhamento de ${remetenteNome}.\n\nDescrição da demanda: ${descricao}\nAlunos envolvidos: ${alunosEnvolvidos}\nData da demanda: ${formatDateToDisplay(
+          data
+        )}\nAmparo legal: ${amparoLegal}\n\nAtenciosamente,\nCoordenação Técnico Pedagógica - CTP`,
       };
       await transporter.sendMail(mailOptions);
     }
@@ -295,6 +297,8 @@ export const listarDemandasUsuario = async (req, res) => {
       return res.status(404).json({ mensagem: "Usuário não encontrado" });
     }
 
+    const { nomeAluno, cursoId, dataInicio, tipoDemanda } = req.body;
+
     const includeCommon = [
       {
         model: db.Usuario,
@@ -339,23 +343,55 @@ export const listarDemandasUsuario = async (req, res) => {
       },
     ];
 
+    let whereClause = {};
     let demandas;
+
+    if (nomeAluno) {
+      whereClause["$DemandaAlunos.Aluno.nome$"] = {
+        [db.Sequelize.Op.like]: `%${nomeAluno}%`,
+      };
+    }
+
+    if (cursoId) {
+      whereClause["$DemandaAlunos.Aluno.Cursos.id$"] = cursoId;
+    }
+
+    if (dataInicio) {
+      const startDate = new Date(dataInicio);
+      const endDate = new Date(startDate);
+      endDate.setHours(23, 59, 59, 999);
+      whereClause.createdAt = {
+        [db.Sequelize.Op.between]: [startDate, endDate],
+      };
+    }
     if (
       usuario.Cargo.nome === "Funcionario CTP" ||
       usuario.Cargo.nome === "Diretor Geral" ||
       usuario.Cargo.nome === "Diretor Ensino"
     ) {
       demandas = await db.Demanda.findAll({
+        where: whereClause,
         include: includeCommon,
         order: [["createdAt", "DESC"]],
       });
     } else {
-      demandas = await db.Demanda.findAll({
-        where: {
+      let tipoWhere = {};
+      if (tipoDemanda === "criadaPorMim") {
+        tipoWhere = { usuario_id: usuario_id };
+      } else if (tipoDemanda === "encaminhada") {
+        tipoWhere = { "$Encaminhamentos.destinatario_id$": usuario_id };
+      } else {
+        tipoWhere = {
           [db.Sequelize.Op.or]: [
             { usuario_id: usuario_id },
             { "$Encaminhamentos.destinatario_id$": usuario_id },
           ],
+        };
+      }
+
+      demandas = await db.Demanda.findAll({
+        where: {
+          [db.Sequelize.Op.and]: [whereClause, tipoWhere],
         },
         include: includeCommon,
         order: [["createdAt", "DESC"]],
@@ -377,7 +413,6 @@ export const listarDemandasUsuario = async (req, res) => {
     }));
 
     return res.status(200).json({ demandas: demandasFormatadas });
-
   } catch (erro) {
     console.error("Erro detalhado ao listar demandas do usuário:", {
       message: erro.message,
@@ -489,7 +524,6 @@ export const listarDemandaPorId = async (req, res) => {
     //primeiro verifica o cargo sendo Funcionario CTP, Diretor Ensino ou Diretor Geral retorna sempre true
     //pega o último encaminhamento desta demanda, se o usuário do último encaminhamento for o mesmo que está logado retorna true
     //do contrário false
-
 
     if (!demanda) {
       return res.status(404).json({ mensagem: "Demanda não encontrada" });
