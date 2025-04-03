@@ -144,17 +144,13 @@ export const criarEncaminhamento = async (req, res) => {
 
   try {
     if (!usuario_id) {
-      return res
-        .status(400)
-        .json({ error: "ID do usuário remetente não foi encontrado no token" });
+      return res.status(400).json({ error: "ID do usuário remetente não foi encontrado no token" });
     }
-    if (
-      !destinatario_id ||
-      (Array.isArray(destinatario_id) && destinatario_id.length === 0)
-    ) {
-      return res
-        .status(400)
-        .json({ error: "Informe pelo menos um destinatário" });
+    if (!destinatario_id) {
+      return res.status(400).json({ error: "Informe um destinatário" });
+    }
+    if (Array.isArray(destinatario_id)) {
+      return res.status(400).json({ error: "A demanda só pode ser encaminhada para uma única pessoa" });
     }
     if (!demanda_id) {
       return res.status(400).json({ error: "ID da demanda é obrigatório" });
@@ -185,11 +181,7 @@ export const criarEncaminhamento = async (req, res) => {
     const usuarioLogado = await db.Usuario.findByPk(usuario_id, {
       include: [{ model: db.Cargo, as: "Cargo", attributes: ["nome"] }],
     });
-    const cargosEspeciais = [
-      "Funcionario CTP",
-      "Diretor Geral",
-      "Diretor Ensino",
-    ];
+    const cargosEspeciais = ["Funcionario CTP", "Diretor Geral", "Diretor Ensino"];
     const isCargoEspecial = cargosEspeciais.includes(usuarioLogado.Cargo.nome);
     const isCriador = demanda.usuario_id === usuario_id;
 
@@ -232,21 +224,13 @@ export const criarEncaminhamento = async (req, res) => {
     }
 
     const dataAtual = new Date();
-    const destinatarios = Array.isArray(destinatario_id)
-      ? destinatario_id
-      : [destinatario_id];
-    const encaminhamentosNovos = [];
-
-    for (const destId of destinatarios) {
-      const novoEncaminhamento = await db.Encaminhamentos.create({
-        usuario_id,
-        demanda_id,
-        destinatario_id: destId,
-        descricao,
-        data: dataAtual,
-      });
-      encaminhamentosNovos.push(novoEncaminhamento);
-    }
+    const novoEncaminhamento = await db.Encaminhamentos.create({
+      usuario_id,
+      demanda_id,
+      destinatario_id, 
+      descricao,
+      data: dataAtual,
+    });
 
     const remetente = await db.Usuario.findByPk(usuario_id, {
       attributes: ["nome"],
@@ -257,7 +241,7 @@ export const criarEncaminhamento = async (req, res) => {
 
     await enviarEmailEncaminhamento(
       remetente.nome,
-      destinatarios,
+      [destinatario_id], 
       demanda_id,
       descricao,
       dataAtual
@@ -297,18 +281,18 @@ export const criarEncaminhamento = async (req, res) => {
     );
 
     return res.status(201).json({
-      encaminhamentos: encaminhamentosNovos.map((enc) => ({
-        ...enc.toJSON(),
-        data: formatDateToDisplay(enc.data),
-      })),
+      encaminhamentos: [
+        {
+          ...novoEncaminhamento.toJSON(),
+          data: formatDateToDisplay(novoEncaminhamento.data),
+        },
+      ],
       demanda: {
         ...demandaAtualizada.toJSON(),
         destinatarios: destinatariosFormatados,
         data: formatDateToDisplay(demanda.createdAt),
       },
-      mensagem: `Encaminhamento${
-        destinatarios.length > 1 ? "s" : ""
-      } realizado${destinatarios.length > 1 ? "s" : ""} com sucesso!`,
+      mensagem: "Encaminhamento realizado com sucesso!",
     });
   } catch (error) {
     console.error("Erro ao processar encaminhamento:", error);
