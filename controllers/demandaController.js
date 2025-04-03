@@ -113,8 +113,6 @@ export const criarDemanda = async (req, res) => {
     req.body;
 
   try {
-    console.log("Payload recebido:", req.body);
-
     const usuario = await db.Usuario.findByPk(usuario_id);
     if (!usuario) {
       return res.status(404).json({ mensagem: "Usuário não encontrado." });
@@ -210,7 +208,6 @@ export const criarDemanda = async (req, res) => {
           "Notificação formal aos superiores para ciência e acompanhamento da demanda",
         data: new Date(),
       }));
-      console.log("Dados para Encaminhamentos:", encaminhamentosData);
       await db.Encaminhamentos.bulkCreate(encaminhamentosData, {
         validate: true,
         fields: [
@@ -360,9 +357,6 @@ export const listarDemandasUsuario = async (req, res) => {
       const endDate = new Date(date);
       endDate.setUTCHours(23, 59, 59, 999);
 
-      console.log("Filtro de data - startDate:", startDate.toISOString());
-      console.log("Filtro de data - endDate:", endDate.toISOString());
-
       whereClause.createdAt = {
         [db.Sequelize.Op.between]: [startDate, endDate],
       };
@@ -420,9 +414,6 @@ export const listarDemandasUsuario = async (req, res) => {
     }
 
     if (demandas.length === 0) {
-      console.log("Nenhuma demanda encontrada com os filtros:", {
-        whereClause,
-      });
       return res
         .status(404)
         .json({ mensagem: "Nenhuma demanda encontrada para este usuário" });
