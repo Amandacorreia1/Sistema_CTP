@@ -152,7 +152,6 @@ export const criarDemanda = async (req, res) => {
           alunoIds.add(aluno.id);
         }
       }
-      console.log("Alunos associados com sucesso");
     }
 
     if (amparoLegal && amparoLegal.length > 0) {
@@ -169,7 +168,6 @@ export const criarDemanda = async (req, res) => {
         amparolegal_id: amparoId,
       }));
       await db.AmparoDemanda.bulkCreate(amparoDemandaData);
-      console.log("Amparos associados com sucesso");
     }
 
     const cargosParaEncaminhar = [
@@ -200,9 +198,6 @@ export const criarDemanda = async (req, res) => {
         data: new Date(),
       }));
       await db.Encaminhamentos.bulkCreate(encaminhamentosData);
-      console.log(
-        `Encaminhamentos automáticos criados para ${usuariosDestinatarios.length} usuários`
-      );
 
       const destinatariosIds = usuariosDestinatarios.map((d) => d.id);
       await enviarEmailEncaminhamento(
@@ -277,14 +272,6 @@ export const listarDemandasUsuario = async (req, res) => {
     }
 
     const { nomeAluno, cursoId, date, tipoDemanda } = req.body || {};
-
-    console.log("Filtros recebidos:", {
-      nomeAluno,
-      cursoId,
-      date,
-      tipoDemanda,
-    });
-    console.log("Usuário logado ID:", usuario_id);
 
     const includeCommon = [
       {
@@ -383,8 +370,6 @@ export const listarDemandasUsuario = async (req, res) => {
           ],
         };
       }
-
-      console.log("Condição tipoWhere:", tipoWhere);
 
       demandas = await db.Demanda.findAll({
         where: {
@@ -548,7 +533,6 @@ export const listarDemandaPorId = async (req, res) => {
       const ultimoEncaminhamento = encaminhamentos[0];
       if (ultimoEncaminhamento.destinatario_id === usuario_id) {
         podeIntervir = true;
-        console.log("Usuário é o último destinatário:", usuario_id);
       } else {
         console.log(
           "Usuário não é o último destinatário:",
@@ -558,31 +542,15 @@ export const listarDemandaPorId = async (req, res) => {
     } else {
       if (isCriador) {
         podeIntervir = true;
-        console.log("Criador sem encaminhamentos manuais");
       } else if (isCargoEspecial) {
         const recebeuEncaminhamentoInicial = encaminhamentos.some(
           (e) => e.destinatario_id === usuario_id
         );
         if (recebeuEncaminhamentoInicial) {
           podeIntervir = true;
-          console.log("Cargo especial recebeu encaminhamento automático");
         }
       }
     }
-
-    console.log(
-      "Encaminhamentos:",
-      encaminhamentos.map((e) => ({
-        id: e.id,
-        remetente_id: e.usuario_id,
-        destinatario_id: e.destinatario_id,
-        data: e.data,
-      }))
-    );
-    console.log("Total iniciais:", totalIniciais);
-    console.log("Total encaminhamentos:", encaminhamentos.length);
-    console.log("Pode intervir final:", podeIntervir);
-
     res.status(200).json({ demanda, podeIntervir });
   } catch (erro) {
     console.error("Erro ao buscar demanda por ID:", erro);
@@ -696,23 +664,14 @@ export const fecharDemanda = async (req, res) => {
     if (encaminhamentos.length > totalIniciais) {
       const ultimoEncaminhamento = encaminhamentos[0];
       podeIntervir = ultimoEncaminhamento.destinatario_id === usuario_id;
-      console.log(
-        "Usuário é o último destinatário?",
-        ultimoEncaminhamento.destinatario_id === usuario_id
-      );
     } else {
       if (isCriador) {
         podeIntervir = true;
-        console.log("Criador sem encaminhamentos manuais");
       } else if (isCargoEspecial) {
         const recebeuEncaminhamentoInicial = encaminhamentos.some(
           (e) => e.destinatario_id === usuario_id
         );
         podeIntervir = recebeuEncaminhamentoInicial;
-        console.log(
-          "Cargo especial recebeu encaminhamento automático?",
-          recebeuEncaminhamentoInicial
-        );
       }
     }
 

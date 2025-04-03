@@ -59,8 +59,6 @@ const enviarEmailEncaminhamento = async (
       attributes: ["id", "nome", "email"],
     });
 
-    console.log("Destinatários para envio de e-mail:", destinatarios);
-
     const formatDateToDisplay = (isoDate) => {
       const date = new Date(isoDate);
       return `${date.getDate().toString().padStart(2, "0")}/${(
@@ -103,10 +101,7 @@ const enviarEmailEncaminhamento = async (
           data
         )}\nAmparo legal: ${amparoLegal}\n\nAtenciosamente,\nCoordenação Técnico Pedagógica - CTP`,
       };
-
-      console.log(`Tentando enviar e-mail para ${destinatario.email}...`);
       await transporter.sendMail(mailOptions);
-      console.log(`E-mail enviado com sucesso para ${destinatario.email}`);
     }
   } catch (error) {
     console.error("Erro ao enviar e-mail de encaminhamento:", error);
@@ -211,7 +206,6 @@ export const criarEncaminhamento = async (req, res) => {
       const ultimoEncaminhamento = encaminhamentos[0];
       if (ultimoEncaminhamento.destinatario_id === usuario_id) {
         podeIntervir = true;
-        console.log("Usuário é o último destinatário:", usuario_id);
       } else {
         console.log(
           "Usuário não é o último destinatário:",
@@ -221,14 +215,12 @@ export const criarEncaminhamento = async (req, res) => {
     } else {
       if (isCriador) {
         podeIntervir = true;
-        console.log("Criador sem encaminhamentos manuais");
       } else if (isCargoEspecial) {
         const recebeuEncaminhamentoInicial = encaminhamentos.some(
           (e) => e.destinatario_id === usuario_id
         );
         if (recebeuEncaminhamentoInicial) {
           podeIntervir = true;
-          console.log("Cargo especial recebeu encaminhamento automático");
         }
       }
     }
