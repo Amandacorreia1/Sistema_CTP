@@ -73,10 +73,11 @@ const enviarEmailEncaminhamento = async (
     const alunosEnvolvidos =
       demanda.DemandaAlunos.length > 0
         ? demanda.DemandaAlunos.map(
-          (da) =>
-            `${da.Aluno.nome} (${da.Aluno.Cursos?.nome || "Curso não informado"
-            })`
-        ).join(", ")
+            (da) =>
+              `${da.Aluno.nome} (${
+                da.Aluno.Cursos?.nome || "Curso não informado"
+              })`
+          ).join(", ")
         : "Nenhum aluno envolvido";
 
     const amparoLegal =
@@ -96,10 +97,11 @@ const enviarEmailEncaminhamento = async (
         from: process.env.EMAIL_USER,
         to: destinatario.email,
         subject: "Encaminhamento de Demanda",
-        text: `Olá ${destinatario.nome
-          },\n\nVocê recebeu um novo encaminhamento de ${remetenteNome}.\n\nDescrição da demanda: ${descricao}\nAlunos envolvidos: ${alunosEnvolvidos}\nData da demanda: ${formatDateToDisplay(
-            data
-          )}\nAmparo legal: ${amparoLegal}\n\nAtenciosamente,\nCoordenação Técnico Pedagógica - CTP`,
+        text: `Olá ${
+          destinatario.nome
+        },\n\nVocê recebeu um novo encaminhamento de ${remetenteNome}.\n\nDescrição da demanda: ${descricao}\nAlunos envolvidos: ${alunosEnvolvidos}\nData da demanda: ${formatDateToDisplay(
+          data
+        )}\nAmparo legal: ${amparoLegal}\n\nAtenciosamente,\nCoordenação Técnico Pedagógica - CTP`,
       };
 
       console.log(`Tentando enviar e-mail para ${destinatario.email}...`);
@@ -166,16 +168,82 @@ export const criarEncaminhamento = async (req, res) => {
       return res.status(400).json({ error: "Informe uma descrição válida" });
     }
 
-    const demanda = await db.Demanda.findByPk(demanda_id);
+    const demanda = await db.Demanda.findByPk(demanda_id, {
+      include: [
+        {
+          model: db.Encaminhamentos,
+          as: "Encaminhamentos",
+          include: [
+            {
+              model: db.Usuario,
+              as: "Destinatario",
+              include: [{ model: db.Cargo, as: "Cargo" }],
+            },
+          ],
+        },
+      ],
+    });
     if (!demanda) {
       return res.status(404).json({ error: "Demanda não encontrada" });
+    }
+
+    const usuarioLogado = await db.Usuario.findByPk(usuario_id, {
+      include: [{ model: db.Cargo, as: "Cargo", attributes: ["nome"] }],
+    });
+    const cargosEspeciais = [
+      "Funcionario CTP",
+      "Diretor Geral",
+      "Diretor Ensino",
+    ];
+    const isCargoEspecial = cargosEspeciais.includes(usuarioLogado.Cargo.nome);
+    const isCriador = demanda.usuario_id === usuario_id;
+
+    const encaminhamentos = demanda.Encaminhamentos.sort(
+      (a, b) => new Date(b.data) - new Date(a.data)
+    );
+    const encaminhamentosIniciais = encaminhamentos.filter((e) =>
+      cargosEspeciais.includes(e.Destinatario.Cargo.nome)
+    );
+    const totalIniciais = encaminhamentosIniciais.length;
+
+    let podeIntervir = false;
+    if (encaminhamentos.length > totalIniciais) {
+      const ultimoEncaminhamento = encaminhamentos[0];
+      if (ultimoEncaminhamento.destinatario_id === usuario_id) {
+        podeIntervir = true;
+        console.log("Usuário é o último destinatário:", usuario_id);
+      } else {
+        console.log(
+          "Usuário não é o último destinatário:",
+          ultimoEncaminhamento.destinatario_id
+        );
+      }
+    } else {
+      if (isCriador) {
+        podeIntervir = true;
+        console.log("Criador sem encaminhamentos manuais");
+      } else if (isCargoEspecial) {
+        const recebeuEncaminhamentoInicial = encaminhamentos.some(
+          (e) => e.destinatario_id === usuario_id
+        );
+        if (recebeuEncaminhamentoInicial) {
+          podeIntervir = true;
+          console.log("Cargo especial recebeu encaminhamento automático");
+        }
+      }
+    }
+
+    if (!podeIntervir) {
+      return res.status(403).json({
+        error: "Você não tem permissão para encaminhar esta demanda no momento",
+      });
     }
 
     const dataAtual = new Date();
     const destinatarios = Array.isArray(destinatario_id)
       ? destinatario_id
       : [destinatario_id];
-    const encaminhamentos = [];
+    const encaminhamentosNovos = [];
 
     for (const destId of destinatarios) {
       const novoEncaminhamento = await db.Encaminhamentos.create({
@@ -185,7 +253,7 @@ export const criarEncaminhamento = async (req, res) => {
         descricao,
         data: dataAtual,
       });
-      encaminhamentos.push(novoEncaminhamento);
+      encaminhamentosNovos.push(novoEncaminhamento);
     }
 
     const remetente = await db.Usuario.findByPk(usuario_id, {
@@ -237,7 +305,7 @@ export const criarEncaminhamento = async (req, res) => {
     );
 
     return res.status(201).json({
-      encaminhamentos: encaminhamentos.map((enc) => ({
+      encaminhamentos: encaminhamentosNovos.map((enc) => ({
         ...enc.toJSON(),
         data: formatDateToDisplay(enc.data),
       })),
@@ -246,8 +314,9 @@ export const criarEncaminhamento = async (req, res) => {
         destinatarios: destinatariosFormatados,
         data: formatDateToDisplay(demanda.createdAt),
       },
-      mensagem: `Encaminhamento${destinatarios.length > 1 ? "s" : ""
-        } realizado${destinatarios.length > 1 ? "s" : ""} com sucesso!`,
+      mensagem: `Encaminhamento${
+        destinatarios.length > 1 ? "s" : ""
+      } realizado${destinatarios.length > 1 ? "s" : ""} com sucesso!`,
     });
   } catch (error) {
     console.error("Erro ao processar encaminhamento:", error);

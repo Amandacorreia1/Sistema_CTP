@@ -140,9 +140,7 @@ export const criarDemanda = async (req, res) => {
             .status(404)
             .json({ mensagem: `Aluno com ID ${aluno.id} não encontrado.` });
         }
-        if (alunoIds.has(aluno.id)) {
-          continue;
-        }
+        if (alunoIds.has(aluno.id)) continue;
         const duplicata = await db.DemandaAluno.findOne({
           where: { demanda_id: novaDemanda.id, aluno_id: aluno.id },
         });
@@ -160,10 +158,6 @@ export const criarDemanda = async (req, res) => {
     if (amparoLegal && amparoLegal.length > 0) {
       for (const amparoId of amparoLegal) {
         const amparoExistente = await db.AmparoLegal.findByPk(amparoId);
-        console.log(
-          `Verificando amparo ID ${amparoId}:`,
-          amparoExistente ? "Encontrado" : "Não encontrado"
-        );
         if (!amparoExistente) {
           return res.status(404).json({
             mensagem: `Amparo legal com ID ${amparoId} não encontrado.`,
@@ -174,7 +168,6 @@ export const criarDemanda = async (req, res) => {
         demanda_id: novaDemanda.id,
         amparolegal_id: amparoId,
       }));
-      console.log("Dados para AmparoDemandas:", amparoDemandaData);
       await db.AmparoDemanda.bulkCreate(amparoDemandaData);
       console.log("Amparos associados com sucesso");
     }
@@ -185,9 +178,7 @@ export const criarDemanda = async (req, res) => {
       "Diretor Ensino",
     ];
     const usuariosDestinatarios = await db.Usuario.findAll({
-      where: {
-        id: { [db.Sequelize.Op.ne]: usuario_id },
-      },
+      where: { id: { [db.Sequelize.Op.ne]: usuario_id } },
       include: [
         {
           model: db.Cargo,
@@ -208,16 +199,7 @@ export const criarDemanda = async (req, res) => {
           "Notificação formal aos superiores para ciência e acompanhamento da demanda",
         data: new Date(),
       }));
-      await db.Encaminhamentos.bulkCreate(encaminhamentosData, {
-        validate: true,
-        fields: [
-          "demanda_id",
-          "usuario_id",
-          "destinatario_id",
-          "descricao",
-          "data",
-        ],
-      });
+      await db.Encaminhamentos.bulkCreate(encaminhamentosData);
       console.log(
         `Encaminhamentos automáticos criados para ${usuariosDestinatarios.length} usuários`
       );
@@ -232,7 +214,7 @@ export const criarDemanda = async (req, res) => {
       );
     } else {
       console.warn(
-        "Nenhum usuário encontrado com os cargos especificados para encaminhamento automático (excluindo o criador)"
+        "Nenhum usuário encontrado com os cargos especificados para encaminhamento automático"
       );
     }
 
@@ -442,6 +424,7 @@ export const listarDemandasUsuario = async (req, res) => {
 export const listarDemandaPorId = async (req, res) => {
   try {
     const { id } = req.params;
+    const usuario_id = req.usuario.id;
 
     const demanda = await db.Demanda.findOne({
       where: { id },
@@ -460,11 +443,7 @@ export const listarDemandaPorId = async (req, res) => {
               model: db.Aluno,
               attributes: ["matricula", "nome", "email"],
               include: [
-                {
-                  model: db.Curso,
-                  as: "Cursos",
-                  attributes: ["id", "nome"],
-                },
+                { model: db.Curso, as: "Cursos", attributes: ["id", "nome"] },
                 {
                   model: db.Condicao,
                   as: "Condicaos",
@@ -488,13 +467,11 @@ export const listarDemandaPorId = async (req, res) => {
               model: db.Usuario,
               as: "Remetente",
               attributes: ["id", "nome", "email"],
-              include: [{ model: db.Cargo, as: "Cargo", attributes: ["nome"] }],
             },
             {
               model: db.Usuario,
               as: "Destinatario",
               attributes: ["id", "nome", "email"],
-              include: [{ model: db.Cargo, as: "Cargo", attributes: ["nome"] }],
             },
           ],
         },
@@ -535,14 +512,76 @@ export const listarDemandaPorId = async (req, res) => {
       ],
     });
 
-    const podeIntervir = true;
-    //primeiro verifica o cargo sendo Funcionario CTP, Diretor Ensino ou Diretor Geral retorna sempre true
-    //pega o último encaminhamento desta demanda, se o usuário do último encaminhamento for o mesmo que está logado retorna true
-    //do contrário false
-
     if (!demanda) {
       return res.status(404).json({ mensagem: "Demanda não encontrada" });
     }
+
+    const usuarioLogado = await db.Usuario.findByPk(usuario_id, {
+      include: [{ model: db.Cargo, as: "Cargo", attributes: ["nome"] }],
+    });
+    const cargosEspeciais = [
+      "Funcionario CTP",
+      "Diretor Geral",
+      "Diretor Ensino",
+    ];
+    const isCargoEspecial = cargosEspeciais.includes(usuarioLogado.Cargo.nome);
+    const isCriador = demanda.usuario_id === usuario_id;
+
+    const encaminhamentos = demanda.Encaminhamentos.sort(
+      (a, b) => new Date(b.data) - new Date(a.data)
+    );
+    const cargosDestinatarios = await db.Usuario.findAll({
+      where: { id: encaminhamentos.map((e) => e.destinatario_id) },
+      include: [{ model: db.Cargo, as: "Cargo", attributes: ["nome"] }],
+    });
+    const encaminhamentosIniciais = encaminhamentos.filter((e) =>
+      cargosDestinatarios.some(
+        (u) =>
+          u.id === e.destinatario_id && cargosEspeciais.includes(u.Cargo.nome)
+      )
+    );
+    const totalIniciais = encaminhamentosIniciais.length;
+
+    let podeIntervir = false;
+
+    if (encaminhamentos.length > totalIniciais) {
+      const ultimoEncaminhamento = encaminhamentos[0];
+      if (ultimoEncaminhamento.destinatario_id === usuario_id) {
+        podeIntervir = true;
+        console.log("Usuário é o último destinatário:", usuario_id);
+      } else {
+        console.log(
+          "Usuário não é o último destinatário:",
+          ultimoEncaminhamento.destinatario_id
+        );
+      }
+    } else {
+      if (isCriador) {
+        podeIntervir = true;
+        console.log("Criador sem encaminhamentos manuais");
+      } else if (isCargoEspecial) {
+        const recebeuEncaminhamentoInicial = encaminhamentos.some(
+          (e) => e.destinatario_id === usuario_id
+        );
+        if (recebeuEncaminhamentoInicial) {
+          podeIntervir = true;
+          console.log("Cargo especial recebeu encaminhamento automático");
+        }
+      }
+    }
+
+    console.log(
+      "Encaminhamentos:",
+      encaminhamentos.map((e) => ({
+        id: e.id,
+        remetente_id: e.usuario_id,
+        destinatario_id: e.destinatario_id,
+        data: e.data,
+      }))
+    );
+    console.log("Total iniciais:", totalIniciais);
+    console.log("Total encaminhamentos:", encaminhamentos.length);
+    console.log("Pode intervir final:", podeIntervir);
 
     res.status(200).json({ demanda, podeIntervir });
   } catch (erro) {
@@ -563,10 +602,7 @@ export const fecharDemanda = async (req, res) => {
           model: db.IntervencaoDemanda,
           as: "IntervencoesDemandas",
           include: [
-            {
-              model: db.Intervencao,
-              as: "Intervencao",
-            },
+            { model: db.Intervencao, as: "Intervencao" },
             {
               model: db.Encaminhamentos,
               as: "Encaminhamentos",
@@ -590,6 +626,24 @@ export const fecharDemanda = async (req, res) => {
           as: "Usuarios",
           include: [{ model: db.Cargo, as: "Cargo", attributes: ["nome"] }],
         },
+        {
+          model: db.DemandaAluno,
+          as: "DemandaAlunos",
+          include: [
+            {
+              model: db.Aluno,
+              as: "Aluno",
+              attributes: ["nome"],
+              include: [
+                {
+                  model: db.Curso,
+                  as: "Cursos",
+                  attributes: ["nome"],
+                },
+              ],
+            },
+          ],
+        },
       ],
     });
 
@@ -608,44 +662,119 @@ export const fecharDemanda = async (req, res) => {
     }
 
     if (demanda.status === false) {
-      return res.status(400).json({
-        mensagem: "Esta demanda já está fechada",
+      return res.status(400).json({ mensagem: "Esta demanda já está fechada" });
+    }
+
+    const usuarioLogado = await db.Usuario.findByPk(usuario_id, {
+      include: [{ model: db.Cargo, as: "Cargo", attributes: ["nome"] }],
+    });
+    const cargosEspeciais = [
+      "Funcionario CTP",
+      "Diretor Geral",
+      "Diretor Ensino",
+    ];
+    const isCargoEspecial = cargosEspeciais.includes(usuarioLogado.Cargo.nome);
+    const isCriador = demanda.usuario_id === usuario_id;
+
+    const encaminhamentos = demanda.Encaminhamentos.sort(
+      (a, b) => new Date(b.data) - new Date(a.data)
+    );
+    const cargosDestinatarios = await db.Usuario.findAll({
+      where: { id: encaminhamentos.map((e) => e.destinatario_id) },
+      include: [{ model: db.Cargo, as: "Cargo", attributes: ["nome"] }],
+    });
+    const encaminhamentosIniciais = encaminhamentos.filter((e) =>
+      cargosDestinatarios.some(
+        (u) =>
+          u.id === e.destinatario_id && cargosEspeciais.includes(u.Cargo.nome)
+      )
+    );
+    const totalIniciais = encaminhamentosIniciais.length;
+
+    let podeIntervir = false;
+
+    if (encaminhamentos.length > totalIniciais) {
+      const ultimoEncaminhamento = encaminhamentos[0];
+      podeIntervir = ultimoEncaminhamento.destinatario_id === usuario_id;
+      console.log(
+        "Usuário é o último destinatário?",
+        ultimoEncaminhamento.destinatario_id === usuario_id
+      );
+    } else {
+      if (isCriador) {
+        podeIntervir = true;
+        console.log("Criador sem encaminhamentos manuais");
+      } else if (isCargoEspecial) {
+        const recebeuEncaminhamentoInicial = encaminhamentos.some(
+          (e) => e.destinatario_id === usuario_id
+        );
+        podeIntervir = recebeuEncaminhamentoInicial;
+        console.log(
+          "Cargo especial recebeu encaminhamento automático?",
+          recebeuEncaminhamentoInicial
+        );
+      }
+    }
+
+    if (!podeIntervir) {
+      return res.status(403).json({
+        mensagem: "Você não tem permissão para fechar esta demanda no momento",
       });
     }
 
-    const encaminhamentos = demanda.Encaminhamentos.sort((a, b) => b.id - a.id);
-
-    const usuarioCriador = demanda.Usuarios;
-    const isFuncionarioCTP = usuarioCriador.Cargo?.nome === "Funcionario CTP";
-    const isCriador = demanda.usuario_id === usuario_id;
-
-    if (encaminhamentos.length > 0) {
-      const ultimoEncaminhamento = encaminhamentos[0];
-
-      if (isCriador && isFuncionarioCTP) {
-      } else if (ultimoEncaminhamento.destinatario_id !== usuario_id) {
-        return res.status(403).json({
-          mensagem:
-            "Apenas o último destinatário pode fechar esta demanda no momento, a menos que você seja o criador e Funcionario CTP",
-        });
-      }
-    } else {
-      if (!isCriador) {
-        return res.status(403).json({
-          mensagem:
-            "Apenas o criador pode fechar esta demanda, pois não foi encaminhada",
-        });
-      }
-    }
-
-    await db.Demanda.update(
-      {
-        status: false,
-      },
-      { where: { id } }
-    );
-
+    await db.Demanda.update({ status: false }, { where: { id } });
     const demandaAtualizada = await db.Demanda.findByPk(id);
+
+    const destinatariosIds = [
+      demanda.usuario_id,
+      ...encaminhamentos.map((e) => e.destinatario_id),
+    ].filter((id, index, self) => self.indexOf(id) === index);
+
+    const usuariosNotificados = await db.Usuario.findAll({
+      where: { id: destinatariosIds },
+      attributes: ["id", "nome", "email"],
+    });
+
+    const formatDateToDisplay = (isoDate) => {
+      const date = new Date(isoDate);
+      return `${date.getDate().toString().padStart(2, "0")}/${(
+        date.getMonth() + 1
+      )
+        .toString()
+        .padStart(2, "0")}/${date.getFullYear()}`;
+    };
+
+    const alunosEnvolvidos =
+      demanda.DemandaAlunos.length > 0
+        ? demanda.DemandaAlunos.map(
+            (da) =>
+              `${da.Aluno.nome} (${
+                da.Aluno.Cursos?.nome || "Curso não informado"
+              })`
+          ).join(", ")
+        : "Nenhum aluno envolvido";
+
+    for (const usuario of usuariosNotificados) {
+      if (!usuario.email) {
+        console.error(
+          `Usuário ${usuario.nome} (ID: ${usuario.id}) não possui e-mail`
+        );
+        continue;
+      }
+
+      const mailOptions = {
+        from: process.env.EMAIL_USER,
+        to: usuario.email,
+        subject: "Demanda Fechada",
+        text: `Olá ${usuario.nome},\n\nA demanda #${id} foi fechada por ${
+          usuarioLogado.nome
+        } em ${formatDateToDisplay(new Date())}.\n\nDescrição: ${
+          demanda.descricao
+        }\nAlunos envolvidos: ${alunosEnvolvidos}\n\nAtenciosamente,\nCoordenação Técnico Pedagógica - CTP`,
+      };
+
+      await transporter.sendMail(mailOptions);
+    }
 
     return res.status(200).json({
       mensagem: "Demanda fechada com sucesso",
@@ -653,9 +782,8 @@ export const fecharDemanda = async (req, res) => {
     });
   } catch (erro) {
     console.error("Erro ao fechar demanda:", erro);
-    return res.status(500).json({
-      mensagem: "Erro ao fechar demanda",
-      erro: erro.message,
-    });
+    return res
+      .status(500)
+      .json({ mensagem: "Erro ao fechar demanda", erro: erro.message });
   }
 };
