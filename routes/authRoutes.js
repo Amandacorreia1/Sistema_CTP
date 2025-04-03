@@ -14,4 +14,9 @@ router.post(
   cadastrarUsuario
 );
 router.post("/login", login);
+
+router.get("/health", (req, res) => {
+  res.status(200).json({ status: "ok", message: "Servidor está online" });
+});
+
 export default router;

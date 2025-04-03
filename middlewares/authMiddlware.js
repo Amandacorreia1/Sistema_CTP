@@ -1,32 +1,28 @@
-import jwt from 'jsonwebtoken';
+import jwt from "jsonwebtoken";
 
-export const autenticarToken = (req, res, next) => {
-    const cabecalhoAutenticacao = req.headers['authorization'];
-    const token = cabecalhoAutenticacao && cabecalhoAutenticacao.split(' ')[1];
+export const autenticarToken = async (req, res, next) => {
+  const cabecalhoAutenticacao = req.headers["authorization"];
+  const token = cabecalhoAutenticacao && cabecalhoAutenticacao.split(" ")[1];
 
-    if (!token) {
-        return res.status(401).json({ mensagem: 'Token não fornecido' });
-    }
+  if (!token) {
+    return res.status(401).json({ mensagem: "Token não fornecido" });
+  }
 
-    jwt.verify(token, process.env.JWT_SECRET, (erro, usuario) => {
-        if (erro) {
-            return res.status(401).json({ mensagem: 'Token inválido ou expirado.' });
-        }
-        req.usuario = usuario;
-        next();
-    });
+  try {
+    const usuario = await jwt.verify(token, process.env.JWT_SECRET);
+    req.usuario = usuario;
+    next();
+  } catch (erro) {
+    console.error("Erro ao verificar token:", erro);
+    return res.status(401).json({ mensagem: "Token inválido ou expirado." });
+  }
 };
 
 export const authorizeRole = (role) => {
-    return (req, res, next) => {
-        try{
-            if (req.usuario.cargo !== role) {
-                return res.status(403).json({ message: 'Acesso negado' });
-            }
-            next();
-
-        } catch (error){
-            return res.status(500).json({ mensagem: 'Erro no servidor.' });
-        }
-    };
-  }; 
+  return (req, res, next) => {
+    if (!req.usuario || req.usuario.cargo !== role) {
+      return res.status(403).json({ mensagem: "Acesso negado" });
+    }
+    next();
+  };
+};

@@ -6,7 +6,6 @@ import bcrypt from "bcrypt";
 dotenv.config();
 
 export const cadastrarUsuario = async (req, res) => {
-  console.log(req.body);
   const { nome, email, senha, matricula, cargo } = req.body;
 
   try {
@@ -33,13 +32,13 @@ export const cadastrarUsuario = async (req, res) => {
     }
 
     const cargoEncontrado = await db.Cargo.findByPk(cargo);
-
     if (!cargoEncontrado) {
       return res.status(400).json({
         mensagem:
           "Cargo não encontrado. Cadastre o cargo antes de criar o usuário.",
       });
     }
+
     const salt = await bcrypt.genSalt(10);
     const senhaCriptografada = await bcrypt.hash(senha, salt);
 
