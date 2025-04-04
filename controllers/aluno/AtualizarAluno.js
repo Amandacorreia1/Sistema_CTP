@@ -1,26 +1,24 @@
 import db from "../../models/index.js";
 
 class AtualizarAluno {
-  async execute({ matricula, nome, email, curso, condicoes }) {
-    if (!nome || !email || !curso) {
-      throw new Error("Nome, email, curso são obrigatórios");
+  async execute({ matricula, condicoes }) {
+    if (!matricula) {
+      throw new Error("Matrícula é obrigatória para identificar o aluno");
+    }
+    if (!condicoes || !Array.isArray(condicoes) || condicoes.length === 0) {
+      throw new Error("Pelo menos uma condição deve ser fornecida");
     }
 
-    const alunoExistente = await db.Aluno.findOne({ where: { matricula } });
+    const alunoExistente = await db.Aluno.findOne({
+      where: { matricula },
+      include: [
+        { model: db.Curso, as: "Cursos" },
+        { model: db.Condicao, as: "Condicaos" },
+      ],
+    });
     if (!alunoExistente) {
       throw new Error("Aluno não encontrado");
     }
-
-    let cursoExistente = await db.Curso.findOne({ where: { nome: curso } });
-    if (!cursoExistente) {
-      cursoExistente = await db.Curso.create({ nome: curso });
-    }
-
-    await alunoExistente.update({
-      nome,
-      email,
-      curso_id: cursoExistente.id,
-    });
 
     const condicaoIds = [];
     for (const condicao of condicoes) {
@@ -61,7 +59,7 @@ class AtualizarAluno {
       matricula: alunoExistente.matricula,
       nome: alunoExistente.nome,
       email: alunoExistente.email,
-      curso: cursoExistente.nome,
+      curso: alunoExistente.Curso?.nome || null,
       condicoes: condicaoRecords.map((c) => ({ id: c.id, nome: c.nome })),
     };
   }
