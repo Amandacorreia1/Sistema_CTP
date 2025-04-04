@@ -5,9 +5,6 @@ class AtualizarAluno {
     if (!matricula) {
       throw new Error("Matrícula é obrigatória para identificar o aluno");
     }
-    if (!condicoes || !Array.isArray(condicoes) || condicoes.length === 0) {
-      throw new Error("Pelo menos uma condição deve ser fornecida");
-    }
 
     const alunoExistente = await db.Aluno.findOne({
       where: { matricula },
@@ -20,38 +17,40 @@ class AtualizarAluno {
       throw new Error("Aluno não encontrado");
     }
 
-    const condicaoIds = [];
-    for (const condicao of condicoes) {
-      let condicaoRecord;
-      if (typeof condicao === "object" && condicao.id && condicao.nome) {
-        condicaoRecord = await db.Condicao.findOne({
-          where: { id: condicao.id },
-        });
-        if (!condicaoRecord) {
-          condicaoRecord = await db.Condicao.create({ nome: condicao.nome });
+    if (condicoes && Array.isArray(condicoes) && condicoes.length > 0) {
+      const condicaoIds = [];
+      for (const condicao of condicoes) {
+        let condicaoRecord;
+        if (typeof condicao === "object" && condicao.id && condicao.nome) {
+          condicaoRecord = await db.Condicao.findOne({
+            where: { id: condicao.id },
+          });
+          if (!condicaoRecord) {
+            condicaoRecord = await db.Condicao.create({ nome: condicao.nome });
+          }
+        } else if (typeof condicao === "string") {
+          condicaoRecord = await db.Condicao.findOne({
+            where: { nome: condicao },
+          });
+          if (!condicaoRecord) {
+            condicaoRecord = await db.Condicao.create({ nome: condicao });
+          }
+        } else if (typeof condicao === "number") {
+          condicaoRecord = await db.Condicao.findOne({
+            where: { id: condicao },
+          });
+          if (!condicaoRecord) {
+            throw new Error(`Condição com ID ${condicao} não encontrada`);
+          }
+        } else {
+          throw new Error("Formato de condição inválido");
         }
-      } else if (typeof condicao === "string") {
-        condicaoRecord = await db.Condicao.findOne({
-          where: { nome: condicao },
-        });
-        if (!condicaoRecord) {
-          condicaoRecord = await db.Condicao.create({ nome: condicao });
-        }
-      } else if (typeof condicao === "number") {
-        condicaoRecord = await db.Condicao.findOne({ where: { id: condicao } });
-        if (!condicaoRecord) {
-          throw new Error(`Condição com ID ${condicao} não encontrada`);
-        }
-      } else {
-        throw new Error("Formato de condição inválido");
+        condicaoIds.push(condicaoRecord.id);
       }
-      condicaoIds.push(condicaoRecord.id);
+      await alunoExistente.setCondicaos(condicaoIds);
     }
-
-    await alunoExistente.setCondicaos(condicaoIds);
-
     const condicaoRecords = await db.Condicao.findAll({
-      where: { id: condicaoIds },
+      where: { id: alunoExistente.Condicaos.map((c) => c.id) },
       attributes: ["id", "nome"],
     });
 
@@ -59,7 +58,7 @@ class AtualizarAluno {
       matricula: alunoExistente.matricula,
       nome: alunoExistente.nome,
       email: alunoExistente.email,
-      curso: alunoExistente.Curso?.nome || null,
+      curso: alunoExistente.Cursos?.nome || "Curso não informado",
       condicoes: condicaoRecords.map((c) => ({ id: c.id, nome: c.nome })),
     };
   }
