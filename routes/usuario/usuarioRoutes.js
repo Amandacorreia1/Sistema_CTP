@@ -1,6 +1,6 @@
 import express from 'express';
-import { buscarTodosUsuarios, buscarUsuariosPorId, buscarUsuarioPorNome, editarUsuario, excluirUsuario, usuariosPorCargo, UsuariosPorNomeOuCargo, usuariosEncaminhamento } from '../controllers/usuarioController.js';
-import { autenticarToken, authorizeRole } from '../middlewares/authMiddlware.js';
+import { buscarTodosUsuarios, buscarUsuariosPorId, buscarUsuarioPorNome, editarUsuario, excluirUsuario, usuariosPorCargo, UsuariosPorNomeOuCargo, usuariosEncaminhamento } from '../../controllers/usuarioController.js';
+import { autenticarToken, authorizeRole } from '../../middlewares/authMiddlware.js';
 
 const router = express.Router();
 

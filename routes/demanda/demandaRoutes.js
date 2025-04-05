@@ -5,9 +5,9 @@ import {
   listarDemandasUsuario,
   listarDemandaPorId,
   fecharDemanda,
-} from "../controllers/demanda/demandaController.js";
-import { autenticarToken } from "../middlewares/authMiddlware.js";
-import { restringirAdmin } from "../middlewares/restringirAdmin.js";
+} from "../../controllers/demanda/demandaController.js";
+import { autenticarToken } from "../../middlewares/authMiddlware.js";
+import { restringirAdmin } from "../../middlewares/restringirAdmin.js";
 
 const router = express.Router();
 

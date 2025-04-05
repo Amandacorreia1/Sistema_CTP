@@ -1,8 +1,8 @@
 import express from "express";
 
-import { listarCursos, listarCursoPorId } from '../controllers/cursoController.js';
-import { restringirAdmin } from '../middlewares/restringirAdmin.js';
-import { autenticarToken } from '../middlewares/authMiddlware.js';
+import { listarCursos, listarCursoPorId } from '../../controllers/cursoController.js';
+import { restringirAdmin } from '../../middlewares/restringirAdmin.js';
+import { autenticarToken } from '../../middlewares/authMiddlware.js';
 
 const router = express.Router();
 

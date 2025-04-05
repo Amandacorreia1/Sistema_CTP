@@ -1,9 +1,9 @@
 import express from "express";
-import { cadastrarUsuario, login } from "../controllers/authController.js";
+import { cadastrarUsuario, login } from "../../controllers/authController.js";
 import {
   autenticarToken,
   authorizeRole,
-} from "../middlewares/authMiddlware.js";
+} from "../../middlewares/authMiddlware.js";
 
 const router = express.Router();
 

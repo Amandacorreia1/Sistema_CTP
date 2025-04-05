@@ -2,7 +2,7 @@ import express from "express";
 import {
   recuperarSenha,
   redefinirSenha,
-} from "../controllers/passwordController.js";
+} from "../../controllers/passwordController.js";
 
 const router = express.Router();
 

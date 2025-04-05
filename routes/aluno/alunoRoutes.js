@@ -5,9 +5,9 @@ import {
   listarAlunos,
   adicionarCondicao,
   atualizarAluno,
-} from "../controllers/aluno/alunoController.js";
-import { autenticarToken } from "../middlewares/authMiddlware.js";
-import { restringirAdmin } from "../middlewares/restringirAdmin.js";
+} from "../../controllers/aluno/alunoController.js";
+import { autenticarToken } from "../../middlewares/authMiddlware.js";
+import { restringirAdmin } from "../../middlewares/restringirAdmin.js";
 
 const router = express.Router();
 

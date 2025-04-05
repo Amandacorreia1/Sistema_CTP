@@ -4,9 +4,9 @@ import {
   listarEncaminhamentosPorUsuario,
   listarEncaminhamentosPorDemanda,
   listarEncaminhamentos,
-} from "../controllers/encaminhamento/encaminhamentoController.js";
-import { autenticarToken } from "../middlewares/authMiddlware.js";
-import { restringirAdmin } from "../middlewares/restringirAdmin.js";
+} from "../../controllers/encaminhamento/encaminhamentoController.js";
+import { autenticarToken } from "../../middlewares/authMiddlware.js";
+import { restringirAdmin } from "../../middlewares/restringirAdmin.js";
 
 const router = express.Router();
 
