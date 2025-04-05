@@ -9,6 +9,12 @@ export const cadastrarUsuario = async (req, res) => {
   const { nome, email, senha, matricula, cargo } = req.body;
 
   try {
+    if (matricula.length < 6) {
+      return res.status(400).json({
+        mensagem: "A matrícula deve ter no mínimo 6 caracteres.",
+      });
+    }
+
     const usuarioExistente = await db.Usuario.findOne({
       attributes: ["id", "matricula", "nome", "senha", "email", "cargo_id"],
       where: { matricula },
