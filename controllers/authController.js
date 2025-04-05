@@ -80,7 +80,6 @@ export const login = async (req, res) => {
       return res.status(404).json({ message: "Usuário não encontrado." });
     }
 
-    //deixar depois so o bcrypt, deiando assim so para testes salvando diretamente no banco um user
     let senhaValida;
     if (usuarioExistente.senha.startsWith("$2b$")) {
       senhaValida = await bcrypt.compare(senha, usuarioExistente.senha);
