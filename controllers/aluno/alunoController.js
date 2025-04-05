@@ -4,6 +4,7 @@ import CadastrarAluno from "./CadastrarAluno.js";
 import AtualizarAluno from "./AtualizarAluno.js";
 import BuscarAluno from "./BuscarAluno.js";
 import ListarAlunos from "./ListarAlunos.js";
+import VerificarAluno from "./VerificarAluno.js";
 
 dotenv.config();
 
@@ -93,5 +94,21 @@ export const listarAlunos = async (req, res) => {
       stack: erro.stack,
     });
     return res.status(500).json({ mensagem: erro.message });
+  }
+};
+
+export const verificarAluno = async (req, res) => {
+  try {
+    const { matricula } = req.params;
+    const result = await VerificarAluno.execute({ matricula });
+    return res.status(200).json(result);
+  } catch (erro) {
+    console.error("Erro ao verificar aluno na base local:", {
+      message: erro.message,
+      stack: erro.stack,
+    });
+    return res
+      .status(erro.message.includes("não encontrado") ? 404 : 500)
+      .json({ mensagem: erro.message });
   }
 };

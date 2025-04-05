@@ -5,6 +5,7 @@ import {
   listarAlunos,
   adicionarCondicao,
   atualizarAluno,
+  verificarAluno,
 } from "../../controllers/aluno/alunoController.js";
 import { autenticarToken } from "../../middlewares/authMiddlware.js";
 import { restringirAdmin } from "../../middlewares/restringirAdmin.js";
@@ -35,6 +36,13 @@ router.put(
   autenticarToken,
   restringirAdmin(),
   atualizarAluno
+);
+
+router.get(
+  "/local/alunos/:matricula",
+  autenticarToken,
+  restringirAdmin(),
+  verificarAluno
 );
 
 export default router;
