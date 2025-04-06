@@ -69,9 +69,24 @@ class ListarDemandasUsuarioController {
       "Diretor Geral",
       "Diretor Ensino",
     ];
+
     if (cargosEspeciais.includes(usuario.Cargo.nome)) {
+      let tipoWhere = {};
+      if (tipoDemanda === "criadaPorMim") {
+        tipoWhere = { usuario_id }; 
+      } else if (tipoDemanda === "encaminhada") {
+        tipoWhere = { "$Encaminhamentos.destinatario_id$": usuario_id }; 
+      } else {
+        tipoWhere = {
+          [db.Sequelize.Op.or]: [
+            { usuario_id },
+            { "$Encaminhamentos.destinatario_id$": usuario_id },
+          ],
+        }; 
+      }
+
       demandas = await db.Demanda.findAll({
-        where: whereClause,
+        where: { [db.Sequelize.Op.and]: [whereClause, tipoWhere] },
         include: includeCommon,
         order: [["createdAt", "DESC"]],
       });
