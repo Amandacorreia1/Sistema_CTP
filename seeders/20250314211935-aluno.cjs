@@ -6,9 +6,9 @@ module.exports = {
     const now = new Date();
 
     await queryInterface.bulkInsert('Alunos', [
-      { matricula: 20221035000028, nome: 'AMANDA DO NASCIMENTO CORREIA', email: 'amandanascimentocorreia18@gmail.com', curso_id: 6, createdAt: now, updatedAt: now },
-      { matricula: 20221035000281, nome: 'MARIA DANIELLY BENICIO DE ARAUJO', email: 'daniellybenicio@outlook.com', curso_id: 6, createdAt: now, updatedAt: now },
-      { matricula: 20221035000052, nome: 'DANIEL TEIXEIRA DA SILVA', email: 'daniel.teixeira08@aluno.ifce.edu.br', curso_id: 3, createdAt: now, updatedAt: now },
+      { matricula: 20221035000001, nome: 'PEDRO ALVES DE LIMA', email: 'pedroalves@gmail.com', curso_id: 6, createdAt: now, updatedAt: now },
+      { matricula: 20221035000002, nome: 'MARIA CLARA OLIVEIRA', email: 'mariaclara@outlook.com', curso_id: 8, createdAt: now, updatedAt: now },
+      { matricula: 20221035000003, nome: 'JOÃO COSTA DA SILVA', email: 'joaocosta@gmail.com', curso_id: 7, createdAt: now, updatedAt: now },
     ]);
   },
 
