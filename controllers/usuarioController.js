@@ -67,11 +67,23 @@ export const editarUsuario = async (req, res) => {
   const { nome, email, cargoId } = req.body;
 
   try {
+    const usuarioExistenteComEmail = await db.Usuario.findOne({
+      where: {
+        email: email,
+        id: { [db.Sequelize.Op.ne]: id }, 
+      },
+    });
+
+    if (usuarioExistenteComEmail) {
+      return res.status(409).json({ mensagem: "Este e-mail já está em uso." });
+    }
+
     const usuario = await db.Usuario.findByPk(id, {
       attributes: { exclude: ["senha"] },
     });
+
     if (!usuario) {
-      return res.status(404).json({ message: "Usuário não encontrado" });
+      return res.status(404).json({ mensagem: "Usuário não encontrado" });
     }
 
     usuario.nome = nome || usuario.nome;
@@ -81,12 +93,12 @@ export const editarUsuario = async (req, res) => {
     await usuario.save();
 
     res.status(200).json({
-      message: "Usuário atualizado com sucesso",
+      mensagem: "Usuário atualizado com sucesso",
       usuario,
     });
   } catch (error) {
     console.error("Erro ao atualizar usuário:", error);
-    res.status(500).json({ message: "Erro ao atualizar usuário" });
+    res.status(500).json({ mensagem: "Erro ao atualizar usuário" });
   }
 };
 
