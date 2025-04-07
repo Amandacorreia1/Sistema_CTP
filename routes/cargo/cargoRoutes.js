@@ -1,5 +1,5 @@
 import express from 'express';
-import { listarCargos, listarCargoPorId, cadastrarCargo } from '../../controllers/cargoController.js';
+import { listarCargos, listarCargoPorId, cadastrarCargo } from '../../controllers/cargo/cargoController.js';
 import { autenticarToken } from '../../middlewares/authMiddlware.js';
 
 const router = express.Router();

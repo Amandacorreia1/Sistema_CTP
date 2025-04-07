@@ -1,5 +1,5 @@
 import express from 'express';
-import { listarAmparoLegal, addAmparoLegal, removeAmparoLegal, listarAmparosPorDemanda } from '../../controllers/amparolegalController.js';
+import { listarAmparoLegal, addAmparoLegal, removeAmparoLegal, listarAmparosPorDemanda } from '../../controllers/amparoLegal/amparolegalController.js';
 import { restringirAdmin } from '../../middlewares/restringirAdmin.js';
 import { autenticarToken } from '../../middlewares/authMiddlware.js';
 

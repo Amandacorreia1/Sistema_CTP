@@ -1,4 +1,4 @@
-import db from '../models/index.js';  
+import db from '../../models/index.js';  
 export const listarCondicoes = async (req, res) => {
     try {
       const condicoes = await db.Condicao.findAll({

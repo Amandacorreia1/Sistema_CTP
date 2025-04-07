@@ -1,5 +1,5 @@
 'use strict';
-import db from '../models/index.js';
+import db from '../../models/index.js';
 import { jwtDecode } from 'jwt-decode';
 
 export const criarIntervencaoDemanda = async (req, res) => {

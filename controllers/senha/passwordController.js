@@ -1,4 +1,4 @@
-import db from "../models/index.js";
+import db from "../../models/index.js";
 import bcrypt from "bcrypt";
 import nodemailer from "nodemailer";
 import { randomBytes } from "crypto";

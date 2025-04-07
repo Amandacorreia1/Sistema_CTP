@@ -1,6 +1,6 @@
 import express from "express";
 
-import { listarCursos, listarCursoPorId } from '../../controllers/cursoController.js';
+import { listarCursos, listarCursoPorId } from '../../controllers/curso/cursoController.js';
 import { restringirAdmin } from '../../middlewares/restringirAdmin.js';
 import { autenticarToken } from '../../middlewares/authMiddlware.js';
 

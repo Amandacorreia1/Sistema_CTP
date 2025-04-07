@@ -1,4 +1,4 @@
-import db from '../models/index.js';
+import db from '../../models/index.js';
 
 export const listarCargos = async (req, res) => {
     try {

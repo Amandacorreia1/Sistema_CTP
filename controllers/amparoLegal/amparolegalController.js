@@ -1,4 +1,4 @@
-import db from '../models/index.js';  
+import db from '../../models/index.js';  
 
 export const listarAmparoLegal = async (req, res) => {
     try {

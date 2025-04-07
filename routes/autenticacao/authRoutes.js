@@ -1,5 +1,5 @@
 import express from "express";
-import { cadastrarUsuario, login } from "../../controllers/authController.js";
+import { cadastrarUsuario, login } from "../../controllers/autenticacao/authController.js";
 import {
   autenticarToken,
   authorizeRole,
