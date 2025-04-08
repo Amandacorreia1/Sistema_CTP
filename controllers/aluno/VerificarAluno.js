@@ -82,8 +82,7 @@ class VerificarAluno {
 
       return novoAluno;
     } catch (error) {
-      console.error("Erro ao buscar na API externa:", error.message);
-      throw new Error("Aluno não encontrado na base local ou na API externa");
+      throw new Error("Matrícula não encontrada.");
     }
   }
 }
